@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objectifs - Mon Budget Malin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <header>
+        <h1>🏆 Objectifs & Défis</h1>
+        <p>Définissez vos objectifs d'épargne et relevez des défis</p>
+    </header>
+
+    <nav class="breadcrumb">
+        <a href="index.html">🏠 Accueil</a> > Objectifs
+    </nav>
+
+    <!-- Onglets de navigation -->
+    <div class="tabs-container">
+        <button class="tab-button active" onclick="showTab('goals')">🎯 Mes Objectifs</button>
+        <button class="tab-button" onclick="showTab('challenges')">🏅 Défis</button>
+        <button class="tab-button" onclick="showTab('achievements')">🏆 Réalisations</button>
+    </div>
+
+    <!-- Section Objectifs -->
+    <section id="goals-tab" class="tab-content active">
+        <h2>🎯 Mes Objectifs d'épargne</h2>
+        
+        <!-- Résumé des objectifs -->
+        <div class="goals-overview">
+            <div class="goal-stat">
+                <span class="stat-label">Objectifs actifs :</span>
+                <span id="active-goals-count" class="stat-value">0</span>
+            </div>
+            <div class="goal-stat">
+                <span class="stat-label">Total épargné :</span>
+                <span id="total-saved" class="stat-value positive">0 FCFA</span>
+            </div>
+            <div class="goal-stat">
+                <span class="stat-label">Objectifs atteints :</span>
+                <span id="completed-goals-count" class="stat-value">0</span>
+            </div>
+            <div class="goal-stat">
+                <span class="stat-label">Progression moyenne :</span>
+                <span id="average-progress" class="stat-value">0%</span>
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="goals-actions">
+            <button onclick="showCreateGoalModal()" class="btn-primary">➕ Créer un objectif</button>
+            <button onclick="showQuickSaveModal()" class="btn-secondary">💰 Épargner rapidement</button>
+        </div>
+
+        <!-- Liste des objectifs -->
+        <div class="goals-container">
+            <h3>📋 Mes objectifs en cours</h3>
+            <div id="goals-list">
+                <!-- Les objectifs seront affichés ici -->
+            </div>
+        </div>
+
+        <!-- Objectifs complétés -->
+        <div class="completed-goals-container">
+            <h3>✅ Objectifs atteints</h3>
+            <div id="completed-goals-list">
+                <!-- Les objectifs complétés seront affichés ici -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Défis -->
+    <section id="challenges-tab" class="tab-content">
+        <h2>🏅 Défis d'épargne</h2>
+        
+        <!-- Défis actifs -->
+        <div class="challenges-container">
+            <h3>🔥 Défis en cours</h3>
+            <div id="active-challenges">
+                <!-- Les défis actifs seront affichés ici -->
+            </div>
+        </div>
+
+        <!-- Nouveaux défis disponibles -->
+        <div class="available-challenges-container">
+            <h3>🎯 Défis disponibles</h3>
+            <div id="available-challenges">
+                <!-- Les défis disponibles seront affichés ici -->
+            </div>
+        </div>
+
+        <!-- Défis complétés -->
+        <div class="completed-challenges-container">
+            <h3>🏆 Défis réussis</h3>
+            <div id="completed-challenges">
+                <!-- Les défis complétés seront affichés ici -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Réalisations -->
+    <section id="achievements-tab" class="tab-content">
+        <h2>🏆 Mes Réalisations</h2>
+        
+        <!-- Statistiques des réalisations -->
+        <div class="achievements-overview">
+            <div class="achievement-stat">
+                <span class="stat-label">Badges gagnés :</span>
+                <span id="badges-earned" class="stat-value">0</span>
+            </div>
+            <div class="achievement-stat">
+                <span class="stat-label">Défis réussis :</span>
+                <span id="challenges-completed" class="stat-value">0</span>
+            </div>
+            <div class="achievement-stat">
+                <span class="stat-label">Objectifs atteints :</span>
+                <span id="goals-completed" class="stat-value">0</span>
+            </div>
+            <div class="achievement-stat">
+                <span class="stat-label">Score total :</span>
+                <span id="total-score" class="stat-value">0</span>
+            </div>
+        </div>
+
+        <!-- Badges et récompenses -->
+        <div class="badges-container">
+            <h3>🏅 Mes Badges</h3>
+            <div id="badges-grid">
+                <!-- Les badges seront affichés ici -->
+            </div>
+        </div>
+
+        <!-- Historique des réalisations -->
+        <div class="achievements-history">
+            <h3>📈 Historique des réalisations</h3>
+            <div id="achievements-timeline">
+                <!-- L'historique sera affiché ici -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal pour créer un objectif -->
+    <div id="createGoalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🎯 Créer un nouvel objectif</h3>
+                <button onclick="closeModal('createGoalModal')" class="modal-close">&times;</button>
+            </div>
+            <form id="createGoalForm">
+                <div class="form-group">
+                    <label for="goalName">Nom de l'objectif :</label>
+                    <input type="text" id="goalName" placeholder="Ex: Voyage en Europe" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="goalDescription">Description :</label>
+                    <textarea id="goalDescription" placeholder="Décrivez votre objectif..." rows="3"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="goalTarget">Montant cible (FCFA) :</label>
+                        <input type="number" id="goalTarget" placeholder="0" required min="1000" step="1000">
+                    </div>
+                    <div class="form-group">
+                        <label for="goalDeadline">Date limite :</label>
+                        <input type="date" id="goalDeadline" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="goalCategory">Catégorie :</label>
+                        <select id="goalCategory" required>
+                            <option value="">Sélectionnez une catégorie</option>
+                            <option value="voyage">✈️ Voyage</option>
+                            <option value="maison">🏠 Maison</option>
+                            <option value="voiture">🚗 Véhicule</option>
+                            <option value="education">📚 Éducation</option>
+                            <option value="sante">🏥 Santé</option>
+                            <option value="loisirs">🎮 Loisirs</option>
+                            <option value="investissement">📈 Investissement</option>
+                            <option value="urgence">🚨 Fonds d'urgence</option>
+                            <option value="autre">💡 Autre</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalIcon">Icône :</label>
+                        <select id="goalIcon" required>
+                            <option value="🎯">🎯 Objectif</option>
+                            <option value="✈️">✈️ Voyage</option>
+                            <option value="🏠">🏠 Maison</option>
+                            <option value="🚗">🚗 Voiture</option>
+                            <option value="📚">📚 Éducation</option>
+                            <option value="🏥">🏥 Santé</option>
+                            <option value="🎮">🎮 Loisirs</option>
+                            <option value="📈">📈 Investissement</option>
+                            <option value="💰">💰 Épargne</option>
+                            <option value="🎁">🎁 Cadeau</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">💾 Créer l'objectif</button>
+                    <button type="button" onclick="closeModal('createGoalModal')" class="btn-secondary">❌ Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal pour épargner rapidement -->
+    <div id="quickSaveModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💰 Épargner rapidement</h3>
+                <button onclick="closeModal('quickSaveModal')" class="modal-close">&times;</button>
+            </div>
+            <form id="quickSaveForm">
+                <div class="form-group">
+                    <label for="quickSaveAmount">Montant à épargner (FCFA) :</label>
+                    <input type="number" id="quickSaveAmount" placeholder="0" required min="100" step="100">
+                </div>
+                
+                <div class="form-group">
+                    <label for="quickSaveGoal">Répartir sur :</label>
+                    <select id="quickSaveGoal" required>
+                        <option value="">Sélectionnez un objectif</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quickSaveDescription">Description (optionnel) :</label>
+                    <input type="text" id="quickSaveDescription" placeholder="Ex: Épargne du mois">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">💾 Épargner</button>
+                    <button type="button" onclick="closeModal('quickSaveModal')" class="btn-secondary">❌ Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="page-actions">
+        <button onclick="window.location.href='index.html'" class="btn-secondary">🏠 Accueil</button>
+        <button onclick="window.location.href='transactions.html'" class="btn-primary">📝 Transactions</button>
+    </div>
+
+    <script src="goals.js"></script>
+    <script>
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeGoalsPage();
+        });
+
+        function initializeGoalsPage() {
+            // Charger les données
+            loadGoalsData();
+            loadChallengesData();
+            loadAchievementsData();
+            
+            // Initialiser les formulaires
+            initializeForms();
+        }
+
+        function showTab(tabName) {
+            // Masquer tous les onglets
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Afficher l'onglet sélectionné
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+            
+            // Recharger les données si nécessaire
+            if (tabName === 'goals') {
+                loadGoalsData();
+            } else if (tabName === 'challenges') {
+                loadChallengesData();
+            } else if (tabName === 'achievements') {
+                loadAchievementsData();
+            }
+        }
+
+        function loadGoalsData() {
+            const goalsManager = new GoalsManager();
+            const goals = goalsManager.getActiveGoals();
+            const completedGoals = goalsManager.getCompletedGoals();
+            
+            updateGoalsOverview(goals, completedGoals);
+            displayGoals(goals);
+            displayCompletedGoals(completedGoals);
+        }
+
+        function loadChallengesData() {
+            const goalsManager = new GoalsManager();
+            const activeChallenges = goalsManager.getActiveChallenges();
+            const availableChallenges = goalsManager.getAvailableChallenges();
+            const completedChallenges = goalsManager.getCompletedChallenges();
+            
+            displayActiveChallenges(activeChallenges);
+            displayAvailableChallenges(availableChallenges);
+            displayCompletedChallenges(completedChallenges);
+        }
+
+        function loadAchievementsData() {
+            const goalsManager = new GoalsManager();
+            const achievements = goalsManager.getAchievements();
+            const badges = goalsManager.getBadges();
+            
+            updateAchievementsOverview(achievements);
+            displayBadges(badges);
+            displayAchievementsTimeline(achievements);
+        }
+
+        function updateGoalsOverview(goals, completedGoals) {
+            const totalSaved = goals.reduce((sum, goal) => sum + goal.saved, 0);
+            const totalProgress = goals.length > 0 ? 
+                goals.reduce((sum, goal) => sum + (goal.saved / goal.target * 100), 0) / goals.length : 0;
+            
+            document.getElementById('active-goals-count').textContent = goals.length;
+            document.getElementById('total-saved').textContent = `${totalSaved.toLocaleString()} FCFA`;
+            document.getElementById('completed-goals-count').textContent = completedGoals.length;
+            document.getElementById('average-progress').textContent = `${totalProgress.toFixed(0)}%`;
+        }
+
+        function displayGoals(goals) {
+            const container = document.getElementById('goals-list');
+            container.innerHTML = '';
+            
+            if (goals.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>🎯 Aucun objectif défini</p>
+                        <p>Créez votre premier objectif d'épargne !</p>
+                        <button onclick="showCreateGoalModal()" class="btn-primary">Créer un objectif</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            goals.forEach(goal => {
+                const progress = (goal.saved / goal.target) * 100;
+                const daysLeft = Math.ceil((new Date(goal.deadline) - new Date()) / (1000 * 60 * 60 * 24));
+                
+                const goalCard = document.createElement('div');
+                goalCard.className = 'goal-card';
+                goalCard.innerHTML = `
+                    <div class="goal-header">
+                        <div class="goal-icon">${goal.icon}</div>
+                        <div class="goal-info">
+                            <h3>${goal.name}</h3>
+                            <p class="goal-description">${goal.description}</p>
+                            <p class="goal-category">${getCategoryLabel(goal.category)}</p>
+                        </div>
+                        <div class="goal-actions">
+                            <button onclick="addToGoal(${goal.id})" class="btn-small">💰 Ajouter</button>
+                            <button onclick="editGoal(${goal.id})" class="btn-small">✏️ Modifier</button>
+                            <button onclick="deleteGoal(${goal.id})" class="btn-small btn-delete">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="goal-progress">
+                        <div class="progress-info">
+                            <span>${goal.saved.toLocaleString()} / ${goal.target.toLocaleString()} FCFA</span>
+                            <span>${progress.toFixed(0)}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min(progress, 100)}%"></div>
+                        </div>
+                        <div class="goal-details">
+                            <span class="goal-deadline">📅 ${formatDate(goal.deadline)}</span>
+                            <span class="goal-days-left ${daysLeft <= 30 ? 'urgent' : ''}">⏰ ${daysLeft} jours restants</span>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(goalCard);
+            });
+        }
+
+        function displayCompletedGoals(completedGoals) {
+            const container = document.getElementById('completed-goals-list');
+            container.innerHTML = '';
+            
+            if (completedGoals.length === 0) {
+                container.innerHTML = '<p class="empty-message">Aucun objectif complété pour le moment.</p>';
+                return;
+            }
+            
+            completedGoals.forEach(goal => {
+                const goalCard = document.createElement('div');
+                goalCard.className = 'goal-card completed';
+                goalCard.innerHTML = `
+                    <div class="goal-header">
+                        <div class="goal-icon">${goal.icon}</div>
+                        <div class="goal-info">
+                            <h3>${goal.name}</h3>
+                            <p class="goal-description">${goal.description}</p>
+                            <p class="goal-category">${getCategoryLabel(goal.category)}</p>
+                        </div>
+                        <div class="goal-status">
+                            <span class="status-badge success">✅ Atteint</span>
+                        </div>
+                    </div>
+                    <div class="goal-progress">
+                        <div class="progress-info">
+                            <span>${goal.target.toLocaleString()} FCFA</span>
+                            <span>100%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100%"></div>
+                        </div>
+                        <div class="goal-details">
+                            <span class="goal-completed-date">✅ Atteint le ${formatDate(goal.completedDate)}</span>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(goalCard);
+            });
+        }
+
+        function displayActiveChallenges(challenges) {
+            const container = document.getElementById('active-challenges');
+            container.innerHTML = '';
+            
+            if (challenges.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>🔥 Aucun défi actif</p>
+                        <p>Relevez un défi pour commencer !</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            challenges.forEach(challenge => {
+                const progress = (challenge.current / challenge.target) * 100;
+                const daysLeft = Math.ceil((new Date(challenge.deadline) - new Date()) / (1000 * 60 * 60 * 24));
+                
+                const challengeCard = document.createElement('div');
+                challengeCard.className = 'challenge-card active';
+                challengeCard.innerHTML = `
+                    <div class="challenge-header">
+                        <div class="challenge-icon">${challenge.icon}</div>
+                        <div class="challenge-info">
+                            <h3>${challenge.name}</h3>
+                            <p>${challenge.description}</p>
+                            <p class="challenge-reward">🏅 ${challenge.reward}</p>
+                        </div>
+                        <div class="challenge-status">
+                            <span class="status-badge ${progress >= 100 ? 'success' : 'warning'}">
+                                ${progress >= 100 ? '✅ Réussi' : '🔥 En cours'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="challenge-progress">
+                        <div class="progress-info">
+                            <span>${challenge.current} / ${challenge.target}</span>
+                            <span>${progress.toFixed(0)}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min(progress, 100)}%"></div>
+                        </div>
+                        <div class="challenge-details">
+                            <span class="challenge-deadline">📅 ${formatDate(challenge.deadline)}</span>
+                            <span class="challenge-days-left">⏰ ${daysLeft} jours restants</span>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(challengeCard);
+            });
+        }
+
+        function displayAvailableChallenges(challenges) {
+            const container = document.getElementById('available-challenges');
+            container.innerHTML = '';
+            
+            challenges.forEach(challenge => {
+                const challengeCard = document.createElement('div');
+                challengeCard.className = 'challenge-card available';
+                challengeCard.innerHTML = `
+                    <div class="challenge-header">
+                        <div class="challenge-icon">${challenge.icon}</div>
+                        <div class="challenge-info">
+                            <h3>${challenge.name}</h3>
+                            <p>${challenge.description}</p>
+                            <p class="challenge-reward">🏅 ${challenge.reward}</p>
+                        </div>
+                        <div class="challenge-actions">
+                            <button onclick="acceptChallenge(${challenge.id})" class="btn-small">🎯 Accepter</button>
+                        </div>
+                    </div>
+                    <div class="challenge-details">
+                        <span class="challenge-duration">⏱️ ${challenge.duration} jours</span>
+                        <span class="challenge-difficulty">⭐ ${'★'.repeat(challenge.difficulty)}</span>
+                    </div>
+                `;
+                
+                container.appendChild(challengeCard);
+            });
+        }
+
+        function displayCompletedChallenges(challenges) {
+            const container = document.getElementById('completed-challenges');
+            container.innerHTML = '';
+            
+            if (challenges.length === 0) {
+                container.innerHTML = '<p class="empty-message">Aucun défi complété pour le moment.</p>';
+                return;
+            }
+            
+            challenges.forEach(challenge => {
+                const challengeCard = document.createElement('div');
+                challengeCard.className = 'challenge-card completed';
+                challengeCard.innerHTML = `
+                    <div class="challenge-header">
+                        <div class="challenge-icon">${challenge.icon}</div>
+                        <div class="challenge-info">
+                            <h3>${challenge.name}</h3>
+                            <p>${challenge.description}</p>
+                            <p class="challenge-reward">🏅 ${challenge.reward}</p>
+                        </div>
+                        <div class="challenge-status">
+                            <span class="status-badge success">✅ Réussi</span>
+                        </div>
+                    </div>
+                    <div class="challenge-details">
+                        <span class="challenge-completed-date">✅ Réussi le ${formatDate(challenge.completedDate)}</span>
+                    </div>
+                `;
+                
+                container.appendChild(challengeCard);
+            });
+        }
+
+        function updateAchievementsOverview(achievements) {
+            const badgesEarned = achievements.filter(a => a.type === 'badge').length;
+            const challengesCompleted = achievements.filter(a => a.type === 'challenge').length;
+            const goalsCompleted = achievements.filter(a => a.type === 'goal').length;
+            const totalScore = achievements.reduce((sum, a) => sum + a.score, 0);
+            
+            document.getElementById('badges-earned').textContent = badgesEarned;
+            document.getElementById('challenges-completed').textContent = challengesCompleted;
+            document.getElementById('goals-completed').textContent = goalsCompleted;
+            document.getElementById('total-score').textContent = totalScore;
+        }
+
+        function displayBadges(badges) {
+            const container = document.getElementById('badges-grid');
+            container.innerHTML = '';
+            
+            badges.forEach(badge => {
+                const badgeCard = document.createElement('div');
+                badgeCard.className = `badge-card ${badge.earned ? 'earned' : 'locked'}`;
+                badgeCard.innerHTML = `
+                    <div class="badge-icon">${badge.icon}</div>
+                    <h3>${badge.name}</h3>
+                    <p>${badge.description}</p>
+                    <span class="badge-status">${badge.earned ? '✅ Gagné' : '🔒 Verrouillé'}</span>
+                `;
+                
+                container.appendChild(badgeCard);
+            });
+        }
+
+        function displayAchievementsTimeline(achievements) {
+            const container = document.getElementById('achievements-timeline');
+            container.innerHTML = '';
+            
+            if (achievements.length === 0) {
+                container.innerHTML = '<p class="empty-message">Aucune réalisation pour le moment.</p>';
+                return;
+            }
+            
+            achievements.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            achievements.forEach(achievement => {
+                const achievementItem = document.createElement('div');
+                achievementItem.className = 'achievement-item';
+                achievementItem.innerHTML = `
+                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-info">
+                        <h3>${achievement.title}</h3>
+                        <p>${achievement.description}</p>
+                        <span class="achievement-date">${formatDate(achievement.date)}</span>
+                    </div>
+                    <div class="achievement-score">
+                        <span>+${achievement.score} pts</span>
+                    </div>
+                `;
+                
+                container.appendChild(achievementItem);
+            });
+        }
+
+        // Fonctions modales
+        function showCreateGoalModal() {
+            document.getElementById('createGoalModal').style.display = 'flex';
+            document.getElementById('goalDeadline').value = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        }
+
+        function showQuickSaveModal() {
+            const goalsManager = new GoalsManager();
+            const goals = goalsManager.getActiveGoals();
+            
+            const select = document.getElementById('quickSaveGoal');
+            select.innerHTML = '<option value="">Sélectionnez un objectif</option>';
+            
+            goals.forEach(goal => {
+                const option = document.createElement('option');
+                option.value = goal.id;
+                option.textContent = `${goal.name} (${goal.saved.toLocaleString()}/${goal.target.toLocaleString()} FCFA)`;
+                select.appendChild(option);
+            });
+            
+            document.getElementById('quickSaveModal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function initializeForms() {
+            // Formulaire de création d'objectif
+            document.getElementById('createGoalForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const goal = {
+                    name: document.getElementById('goalName').value,
+                    description: document.getElementById('goalDescription').value,
+                    target: parseFloat(document.getElementById('goalTarget').value),
+                    deadline: document.getElementById('goalDeadline').value,
+                    category: document.getElementById('goalCategory').value,
+                    icon: document.getElementById('goalIcon').value,
+                    saved: 0,
+                    id: Date.now(),
+                    createdAt: new Date().toISOString()
+                };
+                
+                const goalsManager = new GoalsManager();
+                goalsManager.createGoal(goal);
+                
+                closeModal('createGoalModal');
+                loadGoalsData();
+                showNotification('Objectif créé avec succès !', 'success');
+            });
+            
+            // Formulaire d'épargne rapide
+            document.getElementById('quickSaveForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const amount = parseFloat(document.getElementById('quickSaveAmount').value);
+                const goalId = parseInt(document.getElementById('quickSaveGoal').value);
+                const description = document.getElementById('quickSaveDescription').value;
+                
+                if (!goalId) {
+                    showNotification('Veuillez sélectionner un objectif', 'error');
+                    return;
+                }
+                
+                const goalsManager = new GoalsManager();
+                goalsManager.addToGoal(goalId, amount, description);
+                
+                closeModal('quickSaveModal');
+                loadGoalsData();
+                showNotification(`Épargné ${amount.toLocaleString()} FCFA !`, 'success');
+            });
+        }
+
+        // Fonctions d'action
+        function addToGoal(goalId) {
+            const amount = prompt('Montant à ajouter (FCFA) :');
+            if (!amount || isNaN(amount)) return;
+            
+            const description = prompt('Description (optionnel) :');
+            
+            const goalsManager = new GoalsManager();
+            goalsManager.addToGoal(goalId, parseFloat(amount), description);
+            
+            loadGoalsData();
+            showNotification(`Ajouté ${parseFloat(amount).toLocaleString()} FCFA !`, 'success');
+        }
+
+        function editGoal(goalId) {
+            // Implémentation de l'édition d'objectif
+            showNotification('Fonctionnalité en cours de développement', 'info');
+        }
+
+        function deleteGoal(goalId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet objectif ?')) {
+                const goalsManager = new GoalsManager();
+                goalsManager.deleteGoal(goalId);
+                
+                loadGoalsData();
+                showNotification('Objectif supprimé', 'success');
+            }
+        }
+
+        function acceptChallenge(challengeId) {
+            const goalsManager = new GoalsManager();
+            goalsManager.acceptChallenge(challengeId);
+            
+            loadChallengesData();
+            showNotification('Défi accepté !', 'success');
+        }
+
+        // Fonctions utilitaires
+        function getCategoryLabel(category) {
+            const labels = {
+                'voyage': '✈️ Voyage',
+                'maison': '🏠 Maison',
+                'voiture': '🚗 Véhicule',
+                'education': '📚 Éducation',
+                'sante': '🏥 Santé',
+                'loisirs': '🎮 Loisirs',
+                'investissement': '📈 Investissement',
+                'urgence': '🚨 Fonds d\'urgence',
+                'autre': '💡 Autre'
+            };
+            return labels[category] || category;
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('fr-FR');
+        }
+
+        function showNotification(message, type = 'info') {
+            if (window.showNotification) {
+                window.showNotification(message, type);
+            } else {
+                console.log(`[${type.toUpperCase()}] ${message}`);
+            }
+        }
+
+        // Fermer les modales en cliquant à l'extérieur
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html> 

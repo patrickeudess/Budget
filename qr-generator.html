@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code - Mon Budget Malin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <!-- Bibliothèque QR Code -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>📱 QR Code de partage</h1>
+        <p>Générez un QR code pour partager Mon Budget Malin</p>
+    </header>
+
+    <nav class="breadcrumb">
+        <a href="index.html">🏠 Accueil</a> > QR Code
+    </nav>
+
+    <section id="qr-section">
+        <h2>🔗 Partager l'application</h2>
+        <div class="qr-container">
+            <div class="qr-settings">
+                <h3>⚙️ Paramètres du QR Code</h3>
+                <div class="qr-form">
+                    <div class="form-group">
+                        <label for="qr-url">URL de l'application :</label>
+                        <input type="url" id="qr-url" placeholder="https://votre-app.com" value="">
+                        <small>Entrez l'URL de votre application hébergée</small>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="qr-size">Taille :</label>
+                            <select id="qr-size">
+                                <option value="200">200x200</option>
+                                <option value="300" selected>300x300</option>
+                                <option value="400">400x400</option>
+                                <option value="500">500x500</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="qr-color">Couleur :</label>
+                            <select id="qr-color">
+                                <option value="#009879" selected>Vert (thème)</option>
+                                <option value="#000000">Noir</option>
+                                <option value="#dc3545">Rouge</option>
+                                <option value="#007bff">Bleu</option>
+                                <option value="#6f42c1">Violet</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="qr-text">Texte personnalisé :</label>
+                        <input type="text" id="qr-text" placeholder="Scannez pour accéder à Mon Budget Malin" value="Scannez pour accéder à Mon Budget Malin">
+                    </div>
+                    
+                    <div class="qr-actions">
+                        <button id="generate-qr" class="btn-primary">🔄 Générer QR Code</button>
+                        <button id="download-qr" class="btn-secondary" disabled>💾 Télécharger</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="qr-preview">
+                <h3>📱 Aperçu du QR Code</h3>
+                <div id="qr-code-container">
+                    <div id="qr-code"></div>
+                    <p id="qr-text-display">Scannez pour accéder à Mon Budget Malin</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sharing-tips">
+        <h2>💡 Conseils de partage</h2>
+        <div class="tips-grid">
+            <div class="tip-card">
+                <h3>📱 Mobile</h3>
+                <p>Partagez le QR code sur WhatsApp, Telegram ou par email. Vos amis pourront scanner directement avec leur caméra.</p>
+            </div>
+            <div class="tip-card">
+                <h3>💻 Ordinateur</h3>
+                <p>Imprimez le QR code et collez-le sur votre bureau ou partagez-le sur les réseaux sociaux.</p>
+            </div>
+            <div class="tip-card">
+                <h3>🏢 Bureau</h3>
+                <p>Placez le QR code sur votre bureau ou dans la salle de pause pour que vos collègues puissent l'utiliser.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Variables globales
+        let currentQRCode = null;
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeQRGenerator();
+        });
+        
+        function initializeQRGenerator() {
+            // Définir l'URL par défaut (à modifier selon votre hébergement)
+            const defaultURL = window.location.origin + window.location.pathname.replace('qr-generator.html', 'index.html');
+            document.getElementById('qr-url').value = defaultURL;
+            
+            // Événements
+            document.getElementById('generate-qr').addEventListener('click', generateQRCode);
+            document.getElementById('download-qr').addEventListener('click', downloadQRCode);
+            
+            // Générer le QR code initial
+            generateQRCode();
+        }
+        
+        function generateQRCode() {
+            const url = document.getElementById('qr-url').value;
+            const size = parseInt(document.getElementById('qr-size').value);
+            const color = document.getElementById('qr-color').value;
+            const text = document.getElementById('qr-text').value;
+            
+            if (!url) {
+                showNotification('Veuillez entrer une URL valide', 'error');
+                return;
+            }
+            
+            const qrContainer = document.getElementById('qr-code');
+            const textDisplay = document.getElementById('qr-text-display');
+            
+            // Mettre à jour le texte
+            textDisplay.textContent = text;
+            
+            // Générer le QR code
+            QRCode.toCanvas(qrContainer, url, {
+                width: size,
+                color: {
+                    dark: color,
+                    light: '#FFFFFF'
+                },
+                margin: 2
+            }, function (error) {
+                if (error) {
+                    showNotification('Erreur lors de la génération du QR code', 'error');
+                } else {
+                    currentQRCode = qrContainer.querySelector('canvas');
+                    document.getElementById('download-qr').disabled = false;
+                    showNotification('QR Code généré avec succès !', 'success');
+                }
+            });
+        }
+        
+        function downloadQRCode() {
+            if (!currentQRCode) return;
+            
+            const link = document.createElement('a');
+            link.download = 'mon-budget-malin-qr.png';
+            link.href = currentQRCode.toDataURL();
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('QR Code téléchargé !', 'success');
+        }
+        
+        function showNotification(message, type = 'info') {
+            // Créer une notification simple
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 600;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            if (type === 'success') notification.style.backgroundColor = '#28a745';
+            else if (type === 'error') notification.style.backgroundColor = '#dc3545';
+            else notification.style.backgroundColor = '#009879';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+    
+    <style>
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    </style>
+</body>
+</html> 

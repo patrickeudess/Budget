@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Budget Malin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <script src="plotly.js"></script>
+    <script src="chatbot.js"></script>
+    <script src="goals.js"></script>
+    <script src="mobile-money.js"></script>
+    <script src="education.js"></script>
+    <script src="settings.js"></script>
+</head>
+<body>
+    <header>
+        <h1>💰 Mon Budget Malin</h1>
+        <p>Gérez votre budget simplement et efficacement</p>
+    </header>
+
+    <!-- Section d'accueil claire et intuitive -->
+    <section id="welcome-section">
+        <h2>🎯 Tableau de bord</h2>
+        <div class="quick-summary">
+            <div class="summary-card revenus" onclick="navigateTo('transactions')">
+                <h3>💰 Revenus</h3>
+                <p id="quick-total-revenus">0 FCFA</p>
+                <small>Cliquez pour ajouter</small>
+            </div>
+            <div class="summary-card depenses" onclick="navigateTo('transactions')">
+                <h3>💸 Dépenses</h3>
+                <p id="quick-total-depenses">0 FCFA</p>
+                <small>Cliquez pour ajouter</small>
+            </div>
+            <div class="summary-card solde">
+                <h3>💳 Solde</h3>
+                <p id="quick-solde">0 FCFA</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section des recommandations personnalisées -->
+    <section id="recommendations-section">
+        <h2>💡 Conseils personnalisés</h2>
+        <div id="recommendations-container">
+            <!-- Les recommandations seront générées dynamiquement -->
+        </div>
+    </section>
+
+    <!-- Navigation simplifiée vers les fonctionnalités principales -->
+    <section id="navigation-section">
+        <h2>📋 Fonctionnalités</h2>
+        <div class="nav-grid">
+            <div class="nav-card primary" onclick="navigateTo('transactions')">
+                <div class="nav-icon">📝</div>
+                <h3>Transactions</h3>
+                <p>Ajouter et consulter vos revenus et dépenses</p>
+            </div>
+            <div class="nav-card primary" onclick="navigateTo('budgets')">
+                <div class="nav-icon">🎯</div>
+                <h3>Budgets & Analyses</h3>
+                <p>Gérer vos budgets et voir les statistiques</p>
+            </div>
+            <div class="nav-card" onclick="navigateTo('assistant')">
+                <div class="nav-icon">🤖</div>
+                <h3>Assistant IA</h3>
+                <p>Conseils personnalisés en français</p>
+            </div>
+            <div class="nav-card" onclick="navigateTo('goals')">
+                <div class="nav-icon">🏆</div>
+                <h3>Objectifs</h3>
+                <p>Défis et objectifs d'épargne</p>
+            </div>
+            <div class="nav-card" onclick="navigateTo('data')">
+                <div class="nav-icon">💾</div>
+                <h3>Sauvegarde</h3>
+                <p>Exporter/Importer vos données</p>
+            </div>
+            <div class="nav-card" onclick="navigateTo('help')">
+                <div class="nav-icon">❓</div>
+                <h3>Aide</h3>
+                <p>Instructions et conseils d'utilisation</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section des challenges -->
+    <section id="challenges-section">
+        <h2>🏆 Challenges du moment</h2>
+        <div id="challenges-container">
+            <!-- Les challenges seront affichés ici -->
+        </div>
+    </section>
+
+    <script src="app.js"></script>
+    <script>
+        // Variables globales pour les nouvelles fonctionnalités
+        let assistant;
+        let goalsManager;
+        let mobileMoney;
+        let educationManager;
+        let settingsManager;
+
+        // Enregistre le service worker pour assurer un fonctionnement hors ligne
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .catch(function (error) {
+                    console.log('ServiceWorker registration failed:', error);
+                });
+        }
+
+        // Initialise toutes les fonctionnalités
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeFeatures();
+            updateDashboard();
+        });
+
+        // Initialise les nouvelles fonctionnalités
+        function initializeFeatures() {
+            assistant = new BudgetAssistant();
+            goalsManager = new GoalsManager();
+            mobileMoney = new MobileMoneyIntegration();
+            educationManager = new EducationManager();
+            settingsManager = new SettingsManager();
+
+            // Met à jour les recommandations
+            updateRecommendations();
+        }
+
+        // Met à jour le tableau de bord
+        function updateDashboard() {
+            const transactions = loadTransactions();
+            updateQuickSummary(transactions);
+        }
+
+        // Met à jour les recommandations
+        function updateRecommendations() {
+            const transactions = loadTransactions();
+            const budgets = loadBudgets();
+            const recommendations = assistant.generateRecommendations(transactions, budgets);
+            
+            const container = document.getElementById('recommendations-container');
+            if (container) {
+                container.innerHTML = '';
+                recommendations.forEach(rec => {
+                    const card = document.createElement('div');
+                    card.className = `recommendation-card ${rec.type}`;
+                    card.innerHTML = `
+                        <h3>${rec.icon} ${rec.title}</h3>
+                        <p>${rec.message}</p>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        // Fonction de navigation
+        function navigateTo(section) {
+            const pages = {
+                'transactions': 'transactions.html',
+                'budgets': 'budgets.html',
+                'assistant': 'assistant.html',
+                'goals': 'goals.html',
+                'data': 'data.html',
+                'help': 'help.html',
+                'qr-generator': 'qr-generator.html'
+            };
+            
+            if (pages[section]) {
+                window.location.href = pages[section];
+            }
+        }
+
+        // Fonction utilitaire pour charger les transactions
+        function loadTransactions() {
+            try {
+                const data = JSON.parse(localStorage.getItem('transactions'));
+                return Array.isArray(data) ? data : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        // Fonction utilitaire pour charger les budgets
+        function loadBudgets() {
+            try {
+                const data = JSON.parse(localStorage.getItem('budgets'));
+                return data && typeof data === 'object' ? data : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        // Fonction utilitaire pour afficher les notifications
+        function showNotification(message, type = 'info') {
+            if (window.showNotification) {
+                window.showNotification(message, type);
+            } else {
+                console.log(`[${type.toUpperCase()}] ${message}`);
+            }
+        }
+    </script>
+</body>
+</html>

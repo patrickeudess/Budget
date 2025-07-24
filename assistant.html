@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistant - Mon Budget Malin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <script src="plotly.js"></script>
+    <script src="chatbot.js"></script>
+</head>
+<body>
+    <header>
+        <h1>🤖 Assistant Budget</h1>
+        <p>Votre assistant personnel pour la gestion de budget</p>
+    </header>
+
+    <nav class="breadcrumb">
+        <a href="index.html">🏠 Accueil</a> > Assistant
+    </nav>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="assistant-info">
+                <div class="assistant-avatar">🤖</div>
+                <div class="assistant-details">
+                    <h3>Assistant Budget</h3>
+                    <p>En ligne • Prêt à vous aider</p>
+                </div>
+            </div>
+            <div class="chat-actions">
+                <button id="clear-chat" class="btn-secondary">🗑️ Effacer</button>
+                <button id="export-chat" class="btn-secondary">📤 Exporter</button>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+            <!-- Les messages seront ajoutés ici dynamiquement -->
+        </div>
+
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <input type="text" id="chat-input" placeholder="Posez votre question..." maxlength="500">
+                <button id="send-message" class="send-btn">📤</button>
+            </div>
+            <div class="quick-questions">
+                <button class="quick-question" data-question="Combien ai-je dépensé en transport ce mois-ci ?">
+                    🚗 Transport
+                </button>
+                <button class="quick-question" data-question="Comment va mon budget ?">
+                    📊 Budget
+                </button>
+                <button class="quick-question" data-question="Donne-moi un défi d'épargne">
+                    🏆 Défi
+                </button>
+                <button class="quick-question" data-question="Conseils pour économiser">
+                    💡 Conseils
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <section class="assistant-features">
+        <h2>💡 Ce que je peux faire pour vous</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Analyser vos dépenses</h3>
+                <p>Posez des questions sur vos dépenses par catégorie, période ou montant</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Suivre vos objectifs</h3>
+                <p>Consultez la progression de vos objectifs d'épargne</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💡</div>
+                <h3>Donner des conseils</h3>
+                <p>Recevez des recommandations personnalisées</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🏆</div>
+                <h3>Proposer des défis</h3>
+                <p>Participez à des challenges d'épargne motivants</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="chat-tips">
+        <h2>💬 Exemples de questions</h2>
+        <div class="tips-grid">
+            <div class="tip-card">
+                <h3>📊 Questions sur les dépenses</h3>
+                <ul>
+                    <li>"Combien ai-je dépensé en nourriture ce mois ?"</li>
+                    <li>"Quelle est ma plus grosse dépense ?"</li>
+                    <li>"Combien ai-je dépensé en transport ?"</li>
+                </ul>
+            </div>
+            <div class="tip-card">
+                <h3>💰 Questions sur les revenus</h3>
+                <ul>
+                    <li>"Combien ai-je gagné ce mois ?"</li>
+                    <li>"Quels sont mes revenus ?"</li>
+                    <li>"Comment vont mes finances ?"</li>
+                </ul>
+            </div>
+            <div class="tip-card">
+                <h3>🎯 Questions sur les objectifs</h3>
+                <ul>
+                    <li>"Comment vont mes objectifs ?"</li>
+                    <li>"Quelle est la progression de mes objectifs ?"</li>
+                    <li>"Combien me reste-t-il à épargner ?"</li>
+                </ul>
+            </div>
+            <div class="tip-card">
+                <h3>💡 Demandes de conseils</h3>
+                <ul>
+                    <li>"Donne-moi des conseils"</li>
+                    <li>"Comment économiser plus ?"</li>
+                    <li>"Propose-moi un défi"</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <script src="app.js"></script>
+    <script>
+        let assistant;
+        let isTyping = false;
+
+        // Initialise l'assistant
+        document.addEventListener('DOMContentLoaded', () => {
+            assistant = new BudgetAssistant();
+            initializeChat();
+        });
+
+        function initializeChat() {
+            const chatMessages = document.getElementById('chat-messages');
+            const chatInput = document.getElementById('chat-input');
+            const sendButton = document.getElementById('send-message');
+            const clearButton = document.getElementById('clear-chat');
+            const exportButton = document.getElementById('export-chat');
+
+            // Affiche les messages de l'assistant
+            assistant.getConversation().forEach(message => {
+                addMessageToChat(message.sender, message.content);
+            });
+
+            // Gestionnaire d'envoi de message
+            sendButton.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            // Gestionnaire de questions rapides
+            document.querySelectorAll('.quick-question').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const question = btn.getAttribute('data-question');
+                    chatInput.value = question;
+                    sendMessage();
+                });
+            });
+
+            // Gestionnaire d'effacement
+            clearButton.addEventListener('click', () => {
+                if (confirm('Voulez-vous vraiment effacer toute la conversation ?')) {
+                    assistant.clearConversation();
+                    chatMessages.innerHTML = '';
+                    assistant.getConversation().forEach(message => {
+                        addMessageToChat(message.sender, message.content);
+                    });
+                }
+            });
+
+            // Gestionnaire d'export
+            exportButton.addEventListener('click', () => {
+                exportChat();
+            });
+        }
+
+        function sendMessage() {
+            const chatInput = document.getElementById('chat-input');
+            const message = chatInput.value.trim();
+            
+            if (!message || isTyping) return;
+
+            // Ajoute le message utilisateur
+            addMessageToChat('user', message);
+            chatInput.value = '';
+
+            // Simule la frappe de l'assistant
+            isTyping = true;
+            showTypingIndicator();
+
+            // Traite le message
+            assistant.processUserMessage(message).then(response => {
+                hideTypingIndicator();
+                addMessageToChat('assistant', response);
+                isTyping = false;
+            });
+        }
+
+        function addMessageToChat(sender, content) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}-message`;
+            
+            const avatar = sender === 'user' ? '👤' : '🤖';
+            const name = sender === 'user' ? 'Vous' : 'Assistant';
+            
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="message-avatar">${avatar}</span>
+                    <span class="message-name">${name}</span>
+                    <span class="message-time">${new Date().toLocaleTimeString()}</span>
+                </div>
+                <div class="message-content">${formatMessage(content)}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function formatMessage(content) {
+            // Convertit les sauts de ligne en <br>
+            return content.replace(/\n/g, '<br>');
+        }
+
+        function showTypingIndicator() {
+            const chatMessages = document.getElementById('chat-messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'chat-message assistant-message typing';
+            typingDiv.id = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="message-avatar">🤖</span>
+                    <span class="message-name">Assistant</span>
+                </div>
+                <div class="message-content">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        function exportChat() {
+            const conversation = assistant.getConversation();
+            const data = {
+                conversation: conversation,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `chat_assistant_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            if (window.showNotification) {
+                window.showNotification('Conversation exportée avec succès !', 'success');
+            }
+        }
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .catch(function (error) {
+                    console.log('ServiceWorker registration failed:', error);
+                });
+        }
+    </script>
+</body>
+</html> 

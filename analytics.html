@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyses - Mon Budget Malin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <script src="plotly.js"></script>
+</head>
+<body>
+    <header>
+        <h1>📊 Analyses et statistiques</h1>
+        <p>Visualisez vos données financières</p>
+    </header>
+
+    <nav class="breadcrumb">
+        <a href="index.html">🏠 Accueil</a> > Analyses
+    </nav>
+
+    <section id="summary-section">
+        <h2>📈 Résumé financier</h2>
+        <div class="summary">
+            <div class="summary-card revenus">
+                <h3>💰 Revenus</h3>
+                <p id="total-revenus">0 FCFA</p>
+            </div>
+            <div class="summary-card depenses">
+                <h3>💸 Dépenses</h3>
+                <p id="total-depenses">0 FCFA</p>
+            </div>
+            <div class="summary-card solde">
+                <h3>💳 Solde</h3>
+                <p id="solde">0 FCFA</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="chart-section">
+        <h2>📊 Aperçu des dépenses par catégorie</h2>
+        <div class="chart-filters">
+            <label for="chart-period">Période :</label>
+            <select id="chart-period">
+                <option value="7d">7 derniers jours</option>
+                <option value="1">1 mois</option>
+                <option value="3">3 derniers mois</option>
+                <option value="6">6 derniers mois</option>
+                <option value="12">12 derniers mois</option>
+            </select>
+            <label for="chart-type">Type :</label>
+            <select id="chart-type">
+                <option value="bar">Barres</option>
+                <option value="pie">Camembert</option>
+                <option value="area">Aires</option>
+                <option value="radar">Radar</option>
+            </select>
+        </div>
+        <div id="chart-container" style="height:400px;"></div>
+    </section>
+
+    <section id="evolution-section">
+        <h2>📈 Évolution mensuelle</h2>
+        <div class="evolution-filters">
+            <label for="evolution-type">Type :</label>
+            <select id="evolution-type">
+                <option value="line">Lignes</option>
+                <option value="area">Aires</option>
+                <option value="bar">Barres groupées</option>
+            </select>
+        </div>
+        <div class="evolution-summary">
+            <div class="evolution-stat">
+                <h3>💸 Dépenses moyennes</h3>
+                <p id="avg-expenses">0 FCFA/mois</p>
+            </div>
+            <div class="evolution-stat">
+                <h3>💰 Revenus moyens</h3>
+                <p id="avg-revenues">0 FCFA/mois</p>
+            </div>
+            <div class="evolution-stat">
+                <h3>📊 Tendance</h3>
+                <p id="trend-indicator">Stable</p>
+            </div>
+        </div>
+        <div id="evolution-chart" style="height:350px;"></div>
+    </section>
+
+    <section id="insights-section">
+        <h2>💡 Insights et recommandations</h2>
+        <div id="insights-container">
+            <!-- Les insights seront générés dynamiquement -->
+        </div>
+    </section>
+
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .catch(function (error) {
+                    console.log('ServiceWorker registration failed:', error);
+                });
+        }
+    </script>
+</body>
+</html> 

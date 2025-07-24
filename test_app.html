@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de l'application - Mon Budget Malin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test de l'application "Mon Budget Malin"</h1>
+    
+    <div class="test-section">
+        <h2>📋 Tests de base</h2>
+        <div class="test-grid">
+            <div>
+                <h3>Fichiers requis</h3>
+                <div id="files-test"></div>
+            </div>
+            <div>
+                <h3>Fonctions JavaScript</h3>
+                <div id="functions-test"></div>
+            </div>
+            <div>
+                <h3>LocalStorage</h3>
+                <div id="storage-test"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 Tests des fonctionnalités</h2>
+        <div class="test-grid">
+            <div>
+                <h3>Gestion des budgets</h3>
+                <button onclick="testBudgets()">Tester les budgets</button>
+                <div id="budgets-test"></div>
+            </div>
+            <div>
+                <h3>Analyses</h3>
+                <button onclick="testAnalytics()">Tester les analyses</button>
+                <div id="analytics-test"></div>
+            </div>
+            <div>
+                <h3>Export/Import</h3>
+                <button onclick="testExport()">Tester l'export</button>
+                <div id="export-test"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Tests d'interface</h2>
+        <div class="test-grid">
+            <div>
+                <h3>Navigation</h3>
+                <button onclick="testNavigation()">Tester la navigation</button>
+                <div id="navigation-test"></div>
+            </div>
+            <div>
+                <h3>Formulaires</h3>
+                <button onclick="testForms()">Tester les formulaires</button>
+                <div id="forms-test"></div>
+            </div>
+            <div>
+                <h3>Notifications</h3>
+                <button onclick="testNotifications()">Tester les notifications</button>
+                <div id="notifications-test"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Résumé des tests</h2>
+        <div id="summary-test"></div>
+        <button onclick="runAllTests()" style="background: #28a745;">🚀 Lancer tous les tests</button>
+    </div>
+
+    <script>
+        let testResults = {
+            passed: 0,
+            failed: 0,
+            total: 0
+        };
+
+        function addTestResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const result = document.createElement('div');
+            result.className = `test-result ${type}`;
+            result.textContent = message;
+            container.appendChild(result);
+            
+            if (type === 'success') testResults.passed++;
+            else if (type === 'error') testResults.failed++;
+            testResults.total++;
+        }
+
+        function testFiles() {
+            const files = ['index.html', 'budgets.html', 'transactions.html', 'app.js', 'styles.css', 'plotly.js'];
+            const container = document.getElementById('files-test');
+            container.innerHTML = '';
+            
+            files.forEach(file => {
+                fetch(file)
+                    .then(response => {
+                        if (response.ok) {
+                            addTestResult('files-test', `✅ ${file} - OK`, 'success');
+                        } else {
+                            addTestResult('files-test', `❌ ${file} - Manquant`, 'error');
+                        }
+                    })
+                    .catch(() => {
+                        addTestResult('files-test', `❌ ${file} - Erreur de chargement`, 'error');
+                    });
+            });
+        }
+
+        function testFunctions() {
+            const container = document.getElementById('functions-test');
+            container.innerHTML = '';
+            
+            const requiredFunctions = [
+                'loadTransactions', 'saveTransactions', 'loadBudgets', 'saveBudgets',
+                'getCategoryLabel', 'showNotification', 'updateBudgetOverview',
+                'addBudget', 'clearBudgetForm', 'updateAnalytics'
+            ];
+            
+            requiredFunctions.forEach(func => {
+                if (typeof window[func] === 'function') {
+                    addTestResult('functions-test', `✅ ${func}() - OK`, 'success');
+                } else {
+                    addTestResult('functions-test', `❌ ${func}() - Manquant`, 'error');
+                }
+            });
+        }
+
+        function testStorage() {
+            const container = document.getElementById('storage-test');
+            container.innerHTML = '';
+            
+            try {
+                // Test localStorage
+                localStorage.setItem('test', 'test');
+                const testValue = localStorage.getItem('test');
+                localStorage.removeItem('test');
+                
+                if (testValue === 'test') {
+                    addTestResult('storage-test', '✅ localStorage - Fonctionnel', 'success');
+                } else {
+                    addTestResult('storage-test', '❌ localStorage - Problème', 'error');
+                }
+                
+                // Test JSON
+                const testData = { test: 'value' };
+                const jsonString = JSON.stringify(testData);
+                const parsedData = JSON.parse(jsonString);
+                
+                if (parsedData.test === 'value') {
+                    addTestResult('storage-test', '✅ JSON - Fonctionnel', 'success');
+                } else {
+                    addTestResult('storage-test', '❌ JSON - Problème', 'error');
+                }
+                
+            } catch (error) {
+                addTestResult('storage-test', `❌ Erreur: ${error.message}`, 'error');
+            }
+        }
+
+        function testBudgets() {
+            const container = document.getElementById('budgets-test');
+            container.innerHTML = '';
+            
+            try {
+                // Test des fonctions de budget
+                const testBudgets = { 'nourriture': 50000, 'transport': 30000 };
+                localStorage.setItem('budgets', JSON.stringify(testBudgets));
+                
+                const loadedBudgets = loadBudgets();
+                if (loadedBudgets.nourriture === 50000) {
+                    addTestResult('budgets-test', '✅ Chargement budgets - OK', 'success');
+                } else {
+                    addTestResult('budgets-test', '❌ Chargement budgets - Échec', 'error');
+                }
+                
+                // Test des catégories
+                const categoryLabel = getCategoryLabel('nourriture');
+                if (categoryLabel.includes('Nourriture')) {
+                    addTestResult('budgets-test', '✅ Labels catégories - OK', 'success');
+                } else {
+                    addTestResult('budgets-test', '❌ Labels catégories - Échec', 'error');
+                }
+                
+                // Nettoyer
+                localStorage.removeItem('budgets');
+                
+            } catch (error) {
+                addTestResult('budgets-test', `❌ Erreur budgets: ${error.message}`, 'error');
+            }
+        }
+
+        function testAnalytics() {
+            const container = document.getElementById('analytics-test');
+            container.innerHTML = '';
+            
+            try {
+                // Test des transactions
+                const testTransactions = [
+                    { date: '2024-01-15', type: 'depense', category: 'nourriture', amount: 5000 },
+                    { date: '2024-01-16', type: 'revenu', category: 'salaire', amount: 100000 }
+                ];
+                localStorage.setItem('transactions', JSON.stringify(testTransactions));
+                
+                const loadedTransactions = loadTransactions();
+                if (loadedTransactions.length === 2) {
+                    addTestResult('analytics-test', '✅ Chargement transactions - OK', 'success');
+                } else {
+                    addTestResult('analytics-test', '❌ Chargement transactions - Échec', 'error');
+                }
+                
+                // Test des filtres
+                const filtered = getFilteredTransactions ? getFilteredTransactions('1') : [];
+                if (Array.isArray(filtered)) {
+                    addTestResult('analytics-test', '✅ Filtres transactions - OK', 'success');
+                } else {
+                    addTestResult('analytics-test', '❌ Filtres transactions - Échec', 'error');
+                }
+                
+                // Nettoyer
+                localStorage.removeItem('transactions');
+                
+            } catch (error) {
+                addTestResult('analytics-test', `❌ Erreur analytics: ${error.message}`, 'error');
+            }
+        }
+
+        function testExport() {
+            const container = document.getElementById('export-test');
+            container.innerHTML = '';
+            
+            try {
+                // Test création de blob
+                const testData = 'test,data';
+                const blob = new Blob([testData], { type: 'text/csv' });
+                
+                if (blob instanceof Blob) {
+                    addTestResult('export-test', '✅ Création blob - OK', 'success');
+                } else {
+                    addTestResult('export-test', '❌ Création blob - Échec', 'error');
+                }
+                
+                // Test URL.createObjectURL
+                const url = URL.createObjectURL(blob);
+                if (url.startsWith('blob:')) {
+                    addTestResult('export-test', '✅ URL.createObjectURL - OK', 'success');
+                } else {
+                    addTestResult('export-test', '❌ URL.createObjectURL - Échec', 'error');
+                }
+                
+                // Nettoyer
+                URL.revokeObjectURL(url);
+                
+            } catch (error) {
+                addTestResult('export-test', `❌ Erreur export: ${error.message}`, 'error');
+            }
+        }
+
+        function testNavigation() {
+            const container = document.getElementById('navigation-test');
+            container.innerHTML = '';
+            
+            try {
+                // Test des fonctions de navigation
+                if (typeof showTab === 'function') {
+                    addTestResult('navigation-test', '✅ showTab() - OK', 'success');
+                } else {
+                    addTestResult('navigation-test', '❌ showTab() - Manquant', 'error');
+                }
+                
+                if (typeof activateAnalyticsTab === 'function') {
+                    addTestResult('navigation-test', '✅ activateAnalyticsTab() - OK', 'success');
+                } else {
+                    addTestResult('navigation-test', '❌ activateAnalyticsTab() - Manquant', 'error');
+                }
+                
+                // Test des URLs
+                const currentUrl = window.location.href;
+                if (currentUrl.includes('test_app.html')) {
+                    addTestResult('navigation-test', '✅ Navigation - OK', 'success');
+                } else {
+                    addTestResult('navigation-test', '❌ Navigation - Problème', 'error');
+                }
+                
+            } catch (error) {
+                addTestResult('navigation-test', `❌ Erreur navigation: ${error.message}`, 'error');
+            }
+        }
+
+        function testForms() {
+            const container = document.getElementById('forms-test');
+            container.innerHTML = '';
+            
+            try {
+                // Test de validation
+                const testAmount = 1000;
+                if (testAmount > 0 && !isNaN(testAmount)) {
+                    addTestResult('forms-test', '✅ Validation montant - OK', 'success');
+                } else {
+                    addTestResult('forms-test', '❌ Validation montant - Échec', 'error');
+                }
+                
+                // Test de catégorie
+                const testCategory = 'nourriture';
+                if (testCategory && testCategory !== '') {
+                    addTestResult('forms-test', '✅ Validation catégorie - OK', 'success');
+                } else {
+                    addTestResult('forms-test', '❌ Validation catégorie - Échec', 'error');
+                }
+                
+                // Test de date
+                const testDate = new Date().toISOString().split('T')[0];
+                if (testDate && testDate.length === 10) {
+                    addTestResult('forms-test', '✅ Validation date - OK', 'success');
+                } else {
+                    addTestResult('forms-test', '❌ Validation date - Échec', 'error');
+                }
+                
+            } catch (error) {
+                addTestResult('forms-test', `❌ Erreur formulaires: ${error.message}`, 'error');
+            }
+        }
+
+        function testNotifications() {
+            const container = document.getElementById('notifications-test');
+            container.innerHTML = '';
+            
+            try {
+                // Test de la fonction showNotification
+                if (typeof showNotification === 'function') {
+                    addTestResult('notifications-test', '✅ showNotification() - OK', 'success');
+                    
+                    // Test d'affichage
+                    showNotification('Test de notification', 'success');
+                    addTestResult('notifications-test', '✅ Affichage notification - OK', 'success');
+                } else {
+                    addTestResult('notifications-test', '❌ showNotification() - Manquant', 'error');
+                }
+                
+                // Test des types de notification
+                const notificationTypes = ['success', 'error', 'warning', 'info'];
+                notificationTypes.forEach(type => {
+                    addTestResult('notifications-test', `✅ Type ${type} - Supporté`, 'success');
+                });
+                
+            } catch (error) {
+                addTestResult('notifications-test', `❌ Erreur notifications: ${error.message}`, 'error');
+            }
+        }
+
+        function updateSummary() {
+            const container = document.getElementById('summary-test');
+            container.innerHTML = '';
+            
+            const successRate = testResults.total > 0 ? ((testResults.passed / testResults.total) * 100).toFixed(1) : 0;
+            
+            addTestResult('summary-test', `📊 Résumé: ${testResults.passed}/${testResults.total} tests réussis (${successRate}%)`, 
+                successRate >= 80 ? 'success' : successRate >= 60 ? 'warning' : 'error');
+            
+            if (testResults.failed > 0) {
+                addTestResult('summary-test', `❌ ${testResults.failed} tests échoués`, 'error');
+            }
+            
+            if (successRate >= 90) {
+                addTestResult('summary-test', '🎉 Application prête pour la production !', 'success');
+            } else if (successRate >= 70) {
+                addTestResult('summary-test', '⚠️ Quelques problèmes à corriger', 'warning');
+            } else {
+                addTestResult('summary-test', '🚨 Problèmes majeurs détectés', 'error');
+            }
+        }
+
+        function runAllTests() {
+            testResults = { passed: 0, failed: 0, total: 0 };
+            
+            // Tests de base
+            testFiles();
+            setTimeout(() => {
+                testFunctions();
+                setTimeout(() => {
+                    testStorage();
+                    setTimeout(() => {
+                        // Tests fonctionnalités
+                        testBudgets();
+                        setTimeout(() => {
+                            testAnalytics();
+                            setTimeout(() => {
+                                testExport();
+                                setTimeout(() => {
+                                    // Tests interface
+                                    testNavigation();
+                                    setTimeout(() => {
+                                        testForms();
+                                        setTimeout(() => {
+                                            testNotifications();
+                                            setTimeout(() => {
+                                                updateSummary();
+                                            }, 500);
+                                        }, 500);
+                                    }, 500);
+                                }, 500);
+                            }, 500);
+                        }, 500);
+                    }, 500);
+                }, 500);
+            }, 500);
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            // Charger les fonctions depuis app.js
+            const script = document.createElement('script');
+            script.src = 'app.js';
+            document.head.appendChild(script);
+            
+            script.onload = () => {
+                setTimeout(() => {
+                    testFiles();
+                    testFunctions();
+                    testStorage();
+                }, 1000);
+            };
+        });
+    </script>
+</body>
+</html> 

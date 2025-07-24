@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budgets & Analyses - Mon Budget Malin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <script src="plotly.js"></script>
+</head>
+<body>
+    <header>
+        <h1>📊 Budgets & Analyses</h1>
+        <p>Gérez vos budgets et analysez vos dépenses</p>
+    </header>
+
+    <nav class="breadcrumb">
+        <a href="index.html">🏠 Accueil</a> > Budgets & Analyses
+    </nav>
+
+    <!-- Onglets de navigation -->
+    <div class="tabs-container">
+        <button class="tab-button active" onclick="showTab('budgets')" id="budgets-tab-btn">🎯 Budgets</button>
+        <button class="tab-button" onclick="showTab('analytics')" id="analytics-tab-btn">📊 Analyses</button>
+    </div>
+
+    <!-- Section Budgets -->
+    <section id="budgets-tab" class="tab-content active">
+        <h2>🎯 Gestion des budgets</h2>
+        
+        <!-- Résumé des budgets -->
+        <div class="budget-overview">
+            <div class="budget-stat">
+                <span class="stat-label">Budget total :</span>
+                <span id="total-budget" class="stat-value">0 FCFA</span>
+            </div>
+            <div class="budget-stat">
+                <span class="stat-label">Dépensé :</span>
+                <span id="total-spent" class="stat-value">0 FCFA</span>
+            </div>
+            <div class="budget-stat">
+                <span class="stat-label">Reste :</span>
+                <span id="total-remaining" class="stat-value">0 FCFA</span>
+            </div>
+            <div class="budget-stat">
+                <span class="stat-label">Progression :</span>
+                <span id="total-progress" class="stat-value">0%</span>
+            </div>
+        </div>
+
+        <!-- Alertes de budget -->
+        <div id="budget-alerts" class="budget-alerts">
+            <!-- Les alertes seront générées dynamiquement -->
+        </div>
+
+        <!-- Formulaire pour ajouter/modifier des budgets -->
+        <div class="budget-form-container">
+            <h3>➕ Ajouter/Modifier un budget</h3>
+            <div class="budget-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="budget-category">Catégorie :</label>
+                        <select id="budget-category" required>
+                            <option value="">Sélectionnez une catégorie</option>
+                            <option value="nourriture">🍽️ Nourriture</option>
+                            <option value="transport">🚗 Transport</option>
+                            <option value="logement">🏠 Logement</option>
+                            <option value="sante">🏥 Santé</option>
+                            <option value="communication">📱 Communication</option>
+                            <option value="loisirs">🎮 Loisirs</option>
+                            <option value="vetements">👕 Vêtements</option>
+                            <option value="education">📚 Éducation</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget-amount">Montant (FCFA) :</label>
+                        <input type="number" id="budget-amount" placeholder="0" required min="0" step="1000">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button onclick="addBudget()" class="btn-primary">💾 Ajouter/Modifier</button>
+                    <button onclick="clearBudgetForm()" class="btn-secondary">🔄 Réinitialiser</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableau des budgets -->
+        <div class="budget-table-container">
+            <h3>📋 Budgets par catégorie</h3>
+            
+            <!-- Filtres pour les budgets -->
+            <div class="budget-filters">
+                <div class="filter-group">
+                    <label for="budget-status-filter">Statut :</label>
+                    <select id="budget-status-filter">
+                        <option value="">Tous</option>
+                        <option value="success">✅ OK</option>
+                        <option value="warning">⚠️ Attention</option>
+                        <option value="danger">🚨 Dépassé</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="budget-sort">Trier par :</label>
+                    <select id="budget-sort">
+                        <option value="category">Catégorie</option>
+                        <option value="budget">Budget</option>
+                        <option value="spent">Dépensé</option>
+                        <option value="remaining">Reste</option>
+                        <option value="progress">Progression</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="budget-search">Rechercher :</label>
+                    <input type="text" id="budget-search" placeholder="Catégorie...">
+                </div>
+            </div>
+
+            <div class="budget-table-wrapper">
+                <table id="budgetTable" class="budget-table">
+                    <thead>
+                        <tr>
+                            <th class="category-header">
+                                <span>📂 Catégorie</span>
+                            </th>
+                            <th class="budget-header">
+                                <span>💰 Budget</span>
+                            </th>
+                            <th class="spent-header">
+                                <span>💸 Dépensé</span>
+                            </th>
+                            <th class="remaining-header">
+                                <span>💳 Reste</span>
+                            </th>
+                            <th class="progress-header">
+                                <span>📊 Progression</span>
+                            </th>
+                            <th class="status-header">
+                                <span>🏷️ Statut</span>
+                            </th>
+                            <th class="actions-header">
+                                <span>⚙️ Actions</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="budgetTableBody">
+                        <!-- Les budgets seront affichés ici -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Résumé des budgets filtrés -->
+            <div class="budget-summary">
+                <div class="summary-item">
+                    <span class="summary-label">📋 Budgets affichés :</span>
+                    <span id="filtered-budgets-count" class="summary-value">0</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">💰 Total budget :</span>
+                    <span id="filtered-budget-total" class="summary-value">0 FCFA</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">💸 Total dépensé :</span>
+                    <span id="filtered-spent-total" class="summary-value">0 FCFA</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">📈 Moyenne progression :</span>
+                    <span id="filtered-avg-progress" class="summary-value">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions sur les budgets -->
+        <div class="budget-actions">
+            <button onclick="saveBudgets()" class="btn-primary">💾 Enregistrer les budgets</button>
+            <button onclick="resetBudgets()" class="btn-secondary">🔄 Réinitialiser</button>
+            <button onclick="exportBudgets()" class="btn-secondary">📤 Exporter</button>
+        </div>
+    </section>
+
+    <!-- Section Analyses -->
+    <section id="analytics-tab" class="tab-content">
+        <h2>📊 Analyses et statistiques</h2>
+        
+        <!-- Filtres pour les analyses -->
+        <div class="analytics-filters">
+            <div class="filter-group">
+                <label for="analytics-period">Période :</label>
+                <select id="analytics-period">
+                    <option value="7d">7 derniers jours</option>
+                    <option value="1" selected>1 mois</option>
+                    <option value="3">3 derniers mois</option>
+                    <option value="6">6 derniers mois</option>
+                    <option value="12">12 derniers mois</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="chart-type">Type de graphique :</label>
+                <select id="chart-type">
+                    <option value="bar">Barres</option>
+                    <option value="pie">Camembert</option>
+                    <option value="area">Aires</option>
+                    <option value="radar">Radar</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="evolution-type">Évolution :</label>
+                <select id="evolution-type">
+                    <option value="line">Lignes</option>
+                    <option value="area">Aires</option>
+                    <option value="bar">Barres groupées</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Recommandations basées sur l'analyse -->
+        <div class="analytics-recommendations">
+            <h3>💡 Recommandations basées sur votre analyse</h3>
+            <div id="analytics-recommendations-container">
+                <!-- Les recommandations seront générées dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Graphique des dépenses par catégorie -->
+        <div class="chart-section">
+            <h3>📊 Répartition des dépenses</h3>
+            <div id="analytics-chart" style="height:400px;"></div>
+        </div>
+
+        <!-- Graphique d'évolution -->
+        <div class="chart-section">
+            <h3>📈 Évolution mensuelle</h3>
+            <div class="evolution-summary">
+                <div class="evolution-stat">
+                    <span class="stat-label">Moyenne dépenses :</span>
+                    <span id="avg-expenses" class="stat-value">0 FCFA</span>
+                </div>
+                <div class="evolution-stat">
+                    <span class="stat-label">Moyenne revenus :</span>
+                    <span id="avg-income" class="stat-value">0 FCFA</span>
+                </div>
+                <div class="evolution-stat">
+                    <span class="stat-label">Tendance :</span>
+                    <span id="trend-indicator" class="stat-value">Stable</span>
+                </div>
+            </div>
+            <div id="evolution-chart" style="height:350px;"></div>
+        </div>
+
+        <!-- Actions d'export -->
+        <div class="export-actions">
+            <button onclick="exportToCSV()" class="btn-secondary">📤 Exporter CSV</button>
+            <button onclick="exportToJSON()" class="btn-secondary">📤 Exporter JSON</button>
+        </div>
+    </section>
+
+    <div class="page-actions">
+        <button onclick="window.location.href='index.html'" class="btn-secondary">🏠 Accueil</button>
+        <button onclick="window.location.href='transactions.html'" class="btn-primary">📝 Transactions</button>
+        <button onclick="activateAnalyticsTab()" class="btn-primary" style="background: #6f42c1;">📊 Activer Analyses</button>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeBudgetsPage();
+            
+            // Activer explicitement le bouton Analyses après un court délai
+            setTimeout(() => {
+                activateAnalyticsTab();
+            }, 500);
+        });
+
+        function initializeBudgetsPage() {
+            // Charger les données
+            loadBudgetsData();
+            loadAnalyticsData();
+            
+            // Initialiser le formulaire de budget
+            initializeBudgetForm();
+            
+            // Événements pour les analyses
+            document.getElementById('analytics-period').addEventListener('change', updateAnalytics);
+            document.getElementById('chart-type').addEventListener('change', updateAnalytics);
+            document.getElementById('evolution-type').addEventListener('change', updateEvolution);
+            
+            // Événements pour les filtres de budget
+            document.getElementById('budget-status-filter').addEventListener('change', () => {
+                loadBudgetsData();
+            });
+            
+            document.getElementById('budget-sort').addEventListener('change', () => {
+                loadBudgetsData();
+            });
+            
+            // Événement pour la recherche
+            document.getElementById('budget-search').addEventListener('input', () => {
+                loadBudgetsData();
+            });
+            
+            // Événements pour les boutons d'onglets
+            const analyticsTabBtn = document.getElementById('analytics-tab-btn');
+            const budgetsTabBtn = document.getElementById('budgets-tab-btn');
+            
+            if (analyticsTabBtn) {
+                analyticsTabBtn.addEventListener('click', () => {
+                    // Animation de clic
+                    analyticsTabBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        analyticsTabBtn.style.transform = 'scale(1)';
+                    }, 150);
+                });
+            }
+            
+            if (budgetsTabBtn) {
+                budgetsTabBtn.addEventListener('click', () => {
+                    // Animation de clic
+                    budgetsTabBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        budgetsTabBtn.style.transform = 'scale(1)';
+                    }, 150);
+                });
+            }
+            
+            // Activer l'onglet Analyses par défaut si demandé
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('tab') === 'analytics') {
+                showTab('analytics');
+            }
+            
+            // Vérifier si Plotly est chargé
+            if (typeof Plotly === 'undefined') {
+                showNotification('⚠️ Chargement des graphiques en cours...', 'warning');
+                setTimeout(() => {
+                    if (typeof Plotly !== 'undefined') {
+                        showNotification('✅ Graphiques chargés avec succès', 'success');
+                        loadAnalyticsData();
+                    } else {
+                        showNotification('❌ Erreur de chargement des graphiques', 'error');
+                    }
+                }, 2000);
+            }
+        }
+
+        function initializeBudgetForm() {
+            // Événements pour le formulaire de budget
+            const categorySelect = document.getElementById('budget-category');
+            const amountInput = document.getElementById('budget-amount');
+            const addButton = document.querySelector('.form-actions .btn-primary');
+            const resetButton = document.querySelector('.form-actions .btn-secondary');
+            
+            // Événement pour la sélection de catégorie
+            if (categorySelect) {
+                categorySelect.addEventListener('change', () => {
+                    const selectedCategory = categorySelect.value;
+                    if (selectedCategory) {
+                        // Vérifier si un budget existe déjà pour cette catégorie
+                        const budgets = loadBudgets();
+                        if (budgets[selectedCategory]) {
+                            amountInput.value = budgets[selectedCategory];
+                            showNotification(`📝 Budget existant pour ${getCategoryLabel(selectedCategory)} chargé`, 'info');
+                        } else {
+                            amountInput.value = '';
+                        }
+                    }
+                });
+            }
+            
+            // Événement pour la saisie du montant
+            if (amountInput) {
+                amountInput.addEventListener('input', () => {
+                    const value = parseFloat(amountInput.value);
+                    if (value > 0) {
+                        amountInput.style.borderColor = 'var(--positive-color)';
+                    } else {
+                        amountInput.style.borderColor = 'var(--border-color)';
+                    }
+                });
+                
+                // Validation en temps réel
+                amountInput.addEventListener('blur', () => {
+                    const value = parseFloat(amountInput.value);
+                    if (value <= 0 && amountInput.value !== '') {
+                        showNotification('⚠️ Le montant doit être supérieur à 0', 'warning');
+                        amountInput.focus();
+                    }
+                });
+            }
+            
+            // Événements pour les boutons
+            if (addButton) {
+                addButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    addBudget();
+                });
+                
+                // Animation au survol
+                addButton.addEventListener('mouseenter', () => {
+                    addButton.style.transform = 'translateY(-2px)';
+                    addButton.style.boxShadow = '0 4px 12px rgba(0, 152, 121, 0.3)';
+                });
+                
+                addButton.addEventListener('mouseleave', () => {
+                    addButton.style.transform = 'translateY(0)';
+                    addButton.style.boxShadow = 'none';
+                });
+            }
+            
+            if (resetButton) {
+                resetButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    clearBudgetForm();
+                });
+                
+                // Animation au survol
+                resetButton.addEventListener('mouseenter', () => {
+                    resetButton.style.transform = 'translateY(-2px)';
+                    resetButton.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                });
+                
+                resetButton.addEventListener('mouseleave', () => {
+                    resetButton.style.transform = 'translateY(0)';
+                    resetButton.style.boxShadow = 'none';
+                });
+            }
+            
+            // Validation en temps réel du formulaire
+            const form = document.querySelector('.budget-form');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    addBudget();
+                });
+            }
+        }
+
+        function showTab(tabName) {
+            // Masquer tous les contenus d'onglets
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Désactiver tous les boutons d'onglets
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Afficher le contenu de l'onglet sélectionné
+            const selectedContent = document.getElementById(tabName + '-tab');
+            if (selectedContent) {
+                selectedContent.classList.add('active');
+            }
+            
+            // Activer le bouton de l'onglet sélectionné
+            const selectedButton = document.getElementById(tabName + '-tab-btn');
+            if (selectedButton) {
+                selectedButton.classList.add('active');
+            }
+            
+            // Charger les données spécifiques à l'onglet
+            if (tabName === 'analytics') {
+                loadAnalyticsData();
+                showNotification('📊 Section Analyses chargée', 'success');
+            } else if (tabName === 'budgets') {
+                loadBudgetsData();
+                showNotification('🎯 Section Budgets chargée', 'success');
+            }
+            
+            // Notification pour confirmer le changement
+            const tabLabels = {
+                'budgets': 'Budgets',
+                'analytics': 'Analyses'
+            };
+            
+            // Ajouter une classe pour l'animation
+            selectedContent.style.animation = 'fadeIn 0.3s ease';
+        }
+
+        function loadBudgetsData() {
+            const transactions = loadTransactions();
+            const budgets = loadBudgets();
+            
+            // Mettre à jour le résumé des budgets
+            updateBudgetOverview(transactions, budgets);
+            
+            // Mettre à jour les alertes
+            updateBudgetAlerts(transactions, budgets);
+            
+            // Mettre à jour le tableau des budgets
+            updateBudgetTable(transactions, budgets);
+            
+            // Activer tous les boutons
+            activateBudgetButtons();
+        }
+
+        function activateBudgetButtons() {
+            // Activer le bouton "Enregistrer les budgets"
+            const saveButton = document.querySelector('.budget-actions .btn-primary');
+            if (saveButton) {
+                saveButton.onclick = saveBudgets;
+                saveButton.disabled = false;
+            }
+            
+            // Activer le bouton "Réinitialiser"
+            const resetButton = document.querySelector('.budget-actions .btn-secondary');
+            if (resetButton) {
+                resetButton.onclick = resetBudgets;
+                resetButton.disabled = false;
+            }
+            
+            // Activer le bouton "Exporter"
+            const exportButton = document.querySelector('.budget-actions .btn-secondary:last-child');
+            if (exportButton) {
+                exportButton.onclick = exportBudgets;
+                exportButton.disabled = false;
+            }
+            
+            // Activer les boutons d'action dans le tableau
+            const actionButtons = document.querySelectorAll('.actions-cell .btn-small');
+            actionButtons.forEach(button => {
+                button.disabled = false;
+                button.style.opacity = '1';
+            });
+        }
+
+        function loadAnalyticsData() {
+            // Mettre à jour les analyses
+            updateAnalytics();
+            updateEvolution();
+            
+            // Générer les recommandations
+            const transactions = loadTransactions();
+            const period = document.getElementById('analytics-period').value;
+            const filteredTransactions = getFilteredTransactions(period);
+            
+            // Grouper par catégorie pour les recommandations
+            const categoryData = {};
+            filteredTransactions.filter(t => t.type === 'depense').forEach(transaction => {
+                if (!categoryData[transaction.category]) {
+                    categoryData[transaction.category] = 0;
+                }
+                categoryData[transaction.category] += transaction.amount;
+            });
+            
+            generateAnalyticsRecommendations(filteredTransactions, categoryData);
+        }
+
+        function updateBudgetOverview(transactions, budgets) {
+            const currentMonth = new Date().toISOString().substring(0, 7);
+            const monthTransactions = transactions.filter(t => 
+                t.date.startsWith(currentMonth) && t.type === 'depense'
+            );
+            
+            // Calculer les totaux
+            const totalBudget = Object.values(budgets).reduce((sum, budget) => sum + budget, 0);
+            const totalSpent = monthTransactions.reduce((sum, t) => sum + t.amount, 0);
+            const totalRemaining = totalBudget - totalSpent;
+            const totalProgress = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+            
+            // Mettre à jour l'affichage avec des valeurs par défaut si nécessaire
+            document.getElementById('total-budget').textContent = `${totalBudget.toLocaleString()} FCFA`;
+            document.getElementById('total-spent').textContent = `${totalSpent.toLocaleString()} FCFA`;
+            document.getElementById('total-remaining').textContent = `${totalRemaining.toLocaleString()} FCFA`;
+            document.getElementById('total-progress').textContent = `${totalProgress.toFixed(0)}%`;
+            
+            // Appliquer les couleurs dynamiques
+            const progressElement = document.getElementById('total-progress');
+            progressElement.className = 'stat-value ' + 
+                (totalProgress > 100 ? 'negative' : totalProgress > 80 ? 'warning' : 'positive');
+            
+            const remainingElement = document.getElementById('total-remaining');
+            remainingElement.className = 'stat-value ' + 
+                (totalRemaining < 0 ? 'negative' : 'positive');
+            
+            const spentElement = document.getElementById('total-spent');
+            spentElement.className = 'stat-value ' + 
+                (totalSpent > totalBudget ? 'negative' : 'positive');
+        }
+
+        function addBudget() {
+            const category = document.getElementById('budget-category').value;
+            const amount = parseFloat(document.getElementById('budget-amount').value);
+            
+            // Validation des champs
+            if (!category || category === '') {
+                showNotification('⚠️ Veuillez sélectionner une catégorie', 'warning');
+                document.getElementById('budget-category').focus();
+                return false;
+            }
+            
+            if (isNaN(amount) || amount <= 0) {
+                showNotification('⚠️ Veuillez entrer un montant valide (supérieur à 0)', 'warning');
+                document.getElementById('budget-amount').focus();
+                return false;
+            }
+            
+            // Charger les budgets existants
+            const budgets = loadBudgets();
+            
+            // Vérifier si le budget existe déjà
+            const isUpdate = budgets.hasOwnProperty(category);
+            
+            // Ajouter ou modifier le budget
+            budgets[category] = amount;
+            
+            // Sauvegarder dans localStorage
+            localStorage.setItem('budgets', JSON.stringify(budgets));
+            
+            // Réinitialiser le formulaire
+            clearBudgetForm();
+            
+            // Recharger les données
+            loadBudgetsData();
+            
+            // Notification de succès
+            const action = isUpdate ? 'modifié' : 'ajouté';
+            showNotification(`✅ Budget ${getCategoryLabel(category)} ${action} avec succès ! (${amount.toLocaleString()} FCFA)`, 'success');
+            
+            // Animation de succès
+            const addButton = document.querySelector('.form-actions .btn-primary');
+            if (addButton) {
+                addButton.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    addButton.style.transform = 'scale(1)';
+                }, 150);
+            }
+            
+            return true;
+        }
+
+        function clearBudgetForm() {
+            // Réinitialiser les champs
+            document.getElementById('budget-category').value = '';
+            document.getElementById('budget-amount').value = '';
+            
+            // Retirer le focus
+            document.getElementById('budget-category').blur();
+            document.getElementById('budget-amount').blur();
+            
+            // Animation de réinitialisation
+            const resetButton = document.querySelector('.form-actions .btn-secondary');
+            if (resetButton) {
+                resetButton.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    resetButton.style.transform = 'scale(1)';
+                }, 150);
+            }
+            
+            // Notification
+            showNotification('🔄 Formulaire réinitialisé', 'info');
+            
+            return true;
+        }
+
+        function editBudget(category) {
+            const budgets = loadBudgets();
+            const budget = budgets[category];
+            
+            if (budget) {
+                document.getElementById('budget-category').value = category;
+                document.getElementById('budget-amount').value = budget;
+                
+                // Faire défiler vers le formulaire
+                document.querySelector('.budget-form-container').scrollIntoView({ 
+                    behavior: 'smooth' 
+                });
+                
+                showNotification(`Modification du budget ${getCategoryLabel(category)}`, 'info');
+            }
+        }
+
+        function deleteBudget(category) {
+            if (confirm(`Êtes-vous sûr de vouloir supprimer le budget ${getCategoryLabel(category)} ?`)) {
+                const budgets = loadBudgets();
+                delete budgets[category];
+                
+                localStorage.setItem('budgets', JSON.stringify(budgets));
+                loadBudgetsData();
+                
+                showNotification(`Budget ${getCategoryLabel(category)} supprimé`, 'success');
+            }
+        }
+
+        function updateBudgetAlerts(transactions, budgets) {
+            const alertsContainer = document.getElementById('budget-alerts');
+            alertsContainer.innerHTML = '';
+            
+            const currentMonth = new Date().toISOString().substring(0, 7);
+            const monthTransactions = transactions.filter(t => 
+                t.date.startsWith(currentMonth) && t.type === 'depense'
+            );
+            
+            // Si aucun budget n'est défini
+            if (Object.keys(budgets).length === 0) {
+                alertsContainer.innerHTML = `
+                    <div class="alert info">
+                        <h4>💡 Conseil</h4>
+                        <p>Vous n'avez pas encore défini de budgets. Ajoutez vos premiers budgets pour commencer à suivre vos dépenses !</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const alerts = [];
+            
+            // Vérifier chaque budget
+            Object.keys(budgets).forEach(category => {
+                const budget = budgets[category];
+                const spent = monthTransactions
+                    .filter(t => t.category === category)
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                const percentage = (spent / budget) * 100;
+                
+                if (percentage >= 100) {
+                    alerts.push({
+                        type: 'danger',
+                        title: '🚨 Budget dépassé',
+                        message: `Le budget ${getCategoryLabel(category)} a été dépassé de ${(percentage - 100).toFixed(0)}%`
+                    });
+                } else if (percentage >= 80) {
+                    alerts.push({
+                        type: 'warning',
+                        title: '⚠️ Attention',
+                        message: `Le budget ${getCategoryLabel(category)} atteint ${percentage.toFixed(0)}%`
+                    });
+                }
+            });
+            
+            // Vérifier le budget global
+            const totalBudget = Object.values(budgets).reduce((sum, budget) => sum + budget, 0);
+            const totalSpent = monthTransactions.reduce((sum, t) => sum + t.amount, 0);
+            const totalPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+            
+            if (totalPercentage >= 100) {
+                alerts.push({
+                    type: 'danger',
+                    title: '🚨 Budget global dépassé',
+                    message: `Votre budget global a été dépassé de ${(totalPercentage - 100).toFixed(0)}%`
+                });
+            } else if (totalPercentage >= 80) {
+                alerts.push({
+                    type: 'warning',
+                    title: '⚠️ Budget global',
+                    message: `Votre budget global atteint ${totalPercentage.toFixed(0)}%`
+                });
+            }
+            
+            // Afficher les alertes
+            if (alerts.length === 0) {
+                alertsContainer.innerHTML = `
+                    <div class="alert success">
+                        <h4>✅ Excellente gestion</h4>
+                        <p>Tous vos budgets sont sous contrôle !</p>
+                    </div>
+                `;
+            } else {
+                alerts.forEach(alert => {
+                    const alertElement = document.createElement('div');
+                    alertElement.className = `alert ${alert.type}`;
+                    alertElement.innerHTML = `
+                        <h4>${alert.title}</h4>
+                        <p>${alert.message}</p>
+                    `;
+                    alertsContainer.appendChild(alertElement);
+                });
+            }
+        }
+
+        function updateBudgetTable(transactions, budgets) {
+            const tbody = document.getElementById('budgetTableBody');
+            tbody.innerHTML = '';
+            
+            const currentMonth = new Date().toISOString().substring(0, 7);
+            const monthTransactions = transactions.filter(t => 
+                t.date.startsWith(currentMonth) && t.type === 'depense'
+            );
+            
+            if (Object.keys(budgets).length === 0) {
+                tbody.innerHTML = `
+                    <tr class="empty-row">
+                        <td colspan="7" class="empty-message">
+                            <div class="empty-state">
+                                <div class="empty-icon">📊</div>
+                                <h4>Aucun budget défini</h4>
+                                <p>Ajoutez votre premier budget pour commencer à suivre vos dépenses !</p>
+                                <button onclick="document.querySelector('.budget-form-container').scrollIntoView({behavior: 'smooth'})" class="btn-primary">
+                                    ➕ Ajouter un budget
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                updateBudgetSummary([], []);
+                return;
+            }
+            
+            // Préparer les données des budgets
+            let budgetData = [];
+            Object.keys(budgets).forEach(category => {
+                const budget = budgets[category];
+                const spent = monthTransactions
+                    .filter(t => t.category === category)
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                const remaining = budget - spent;
+                const percentage = (spent / budget) * 100;
+                const status = percentage >= 100 ? 'danger' : percentage >= 80 ? 'warning' : 'success';
+                
+                budgetData.push({
+                    category,
+                    budget,
+                    spent,
+                    remaining,
+                    percentage,
+                    status,
+                    categoryLabel: getCategoryLabel(category)
+                });
+            });
+            
+            // Appliquer les filtres
+            const statusFilter = document.getElementById('budget-status-filter').value;
+            const searchTerm = document.getElementById('budget-search').value.toLowerCase();
+            
+            if (statusFilter) {
+                budgetData = budgetData.filter(item => item.status === statusFilter);
+            }
+            
+            if (searchTerm) {
+                budgetData = budgetData.filter(item => 
+                    item.categoryLabel.toLowerCase().includes(searchTerm) ||
+                    item.category.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Appliquer le tri
+            const sortBy = document.getElementById('budget-sort').value;
+            budgetData.sort((a, b) => {
+                switch (sortBy) {
+                    case 'category':
+                        return a.categoryLabel.localeCompare(b.categoryLabel);
+                    case 'budget':
+                        return b.budget - a.budget;
+                    case 'spent':
+                        return b.spent - a.spent;
+                    case 'remaining':
+                        return b.remaining - a.remaining;
+                    case 'progress':
+                        return b.percentage - a.percentage;
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Afficher les budgets filtrés
+            budgetData.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.className = `budget-row ${item.status} ${index % 2 === 0 ? 'even' : 'odd'}`;
+                row.innerHTML = `
+                    <td class="category-cell">
+                        <div class="category-info">
+                            <span class="category-icon">${getCategoryIcon(item.category)}</span>
+                            <div class="category-details">
+                                <span class="category-name">${item.categoryLabel}</span>
+                                <span class="category-code">${item.category}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="budget-amount">
+                        <div class="amount-display">
+                            <span class="amount-value">${item.budget.toLocaleString()}</span>
+                            <span class="amount-currency">FCFA</span>
+                        </div>
+                    </td>
+                    <td class="spent-amount ${item.spent > item.budget ? 'negative' : ''}">
+                        <div class="amount-display">
+                            <span class="amount-value">${item.spent.toLocaleString()}</span>
+                            <span class="amount-currency">FCFA</span>
+                        </div>
+                    </td>
+                    <td class="remaining-amount ${item.remaining >= 0 ? 'positive' : 'negative'}">
+                        <div class="amount-display">
+                            <span class="amount-value">${item.remaining.toLocaleString()}</span>
+                            <span class="amount-currency">FCFA</span>
+                        </div>
+                    </td>
+                    <td class="progress-cell">
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill ${item.status}" style="width: ${Math.min(item.percentage, 100)}%"></div>
+                            </div>
+                            <div class="progress-info">
+                                <span class="progress-text">${item.percentage.toFixed(0)}%</span>
+                                <span class="progress-detail">${item.spent.toLocaleString()} / ${item.budget.toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="status-cell">
+                        <span class="status-badge ${item.status}">
+                            ${item.status === 'danger' ? '🚨 Dépassé' : item.status === 'warning' ? '⚠️ Attention' : '✅ OK'}
+                        </span>
+                    </td>
+                    <td class="actions-cell">
+                        <div class="action-buttons">
+                            <button onclick="editBudget('${item.category}')" class="btn-small btn-edit" title="Modifier">
+                                ✏️
+                            </button>
+                            <button onclick="viewBudgetDetails('${item.category}')" class="btn-small btn-info" title="Détails">
+                                📊
+                            </button>
+                            <button onclick="deleteBudget('${item.category}')" class="btn-small btn-delete" title="Supprimer">
+                                🗑️
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            // Mettre à jour le résumé des budgets filtrés
+            updateBudgetSummary(budgetData, monthTransactions);
+        }
+
+        function updateBudgetSummary(budgetData, monthTransactions) {
+            const count = budgetData.length;
+            const totalBudget = budgetData.reduce((sum, item) => sum + item.budget, 0);
+            const totalSpent = budgetData.reduce((sum, item) => sum + item.spent, 0);
+            const avgProgress = budgetData.length > 0 ? 
+                budgetData.reduce((sum, item) => sum + item.percentage, 0) / budgetData.length : 0;
+            
+            document.getElementById('filtered-budgets-count').textContent = count;
+            document.getElementById('filtered-budget-total').textContent = `${totalBudget.toLocaleString()} FCFA`;
+            document.getElementById('filtered-spent-total').textContent = `${totalSpent.toLocaleString()} FCFA`;
+            document.getElementById('filtered-avg-progress').textContent = `${avgProgress.toFixed(0)}%`;
+            
+            // Couleurs du résumé
+            const avgProgressElement = document.getElementById('filtered-avg-progress');
+            avgProgressElement.className = 'summary-value ' + 
+                (avgProgress > 80 ? 'warning' : avgProgress > 100 ? 'negative' : 'positive');
+        }
+
+        function viewBudgetDetails(category) {
+            const budgets = loadBudgets();
+            const transactions = loadTransactions();
+            const budget = budgets[category];
+            
+            if (!budget) return;
+            
+            const currentMonth = new Date().toISOString().substring(0, 7);
+            const monthTransactions = transactions.filter(t => 
+                t.date.startsWith(currentMonth) && t.type === 'depense' && t.category === category
+            );
+            
+            const spent = monthTransactions.reduce((sum, t) => sum + t.amount, 0);
+            const remaining = budget - spent;
+            const percentage = (spent / budget) * 100;
+            
+            const details = `
+Budget: ${budget.toLocaleString()} FCFA
+Dépensé: ${spent.toLocaleString()} FCFA
+Reste: ${remaining.toLocaleString()} FCFA
+Progression: ${percentage.toFixed(0)}%
+Transactions: ${monthTransactions.length}
+            `;
+            
+            alert(`Détails du budget ${getCategoryLabel(category)}:\n\n${details}`);
+        }
+
+        function getCategoryIcon(category) {
+            const icons = {
+                'nourriture': '🍽️',
+                'transport': '🚗',
+                'logement': '🏠',
+                'sante': '🏥',
+                'communication': '📱',
+                'loisirs': '🎮',
+                'vetements': '👕',
+                'education': '📚'
+            };
+            return icons[category] || '💰';
+        }
+
+        function updateAnalytics() {
+            const period = document.getElementById('analytics-period').value;
+            const chartType = document.getElementById('chart-type').value;
+            
+            const transactions = getFilteredTransactions(period);
+            const expenses = transactions.filter(t => t.type === 'depense');
+            
+            // Grouper par catégorie
+            const categoryData = {};
+            expenses.forEach(transaction => {
+                if (!categoryData[transaction.category]) {
+                    categoryData[transaction.category] = 0;
+                }
+                categoryData[transaction.category] += transaction.amount;
+            });
+            
+            // Préparer les données pour le graphique
+            const categories = Object.keys(categoryData);
+            const amounts = Object.values(categoryData);
+            const colors = categories.map((_, index) => getCategoryColor(index));
+            
+            // Créer le graphique selon le type sélectionné
+            let trace;
+            const layout = {
+                title: 'Répartition des dépenses par catégorie',
+                height: 400,
+                margin: { t: 50, b: 50, l: 50, r: 50 },
+                showlegend: true,
+                legend: {
+                    orientation: 'h',
+                    y: -0.2
+                }
+            };
+            
+            switch (chartType) {
+                case 'bar':
+                    trace = [{
+                        x: categories.map(cat => getCategoryLabel(cat)),
+                        y: amounts,
+                        type: 'bar',
+                        marker: { color: colors },
+                        text: amounts.map(amount => `${amount.toLocaleString()} FCFA`),
+                        textposition: 'auto',
+                        hovertemplate: '<b>%{x}</b><br>Montant: %{y:,.0f} FCFA<extra></extra>'
+                    }];
+                    break;
+                    
+                case 'pie':
+                    trace = [{
+                        labels: categories.map(cat => getCategoryLabel(cat)),
+                        values: amounts,
+                        type: 'pie',
+                        marker: { colors: colors },
+                        textinfo: 'label+percent',
+                        textposition: 'outside',
+                        hovertemplate: '<b>%{label}</b><br>Montant: %{value:,.0f} FCFA<br>Pourcentage: %{percent}<extra></extra>'
+                    }];
+                    layout.title = 'Répartition en pourcentage';
+                    break;
+                    
+                case 'area':
+                    trace = [{
+                        x: categories.map(cat => getCategoryLabel(cat)),
+                        y: amounts,
+                        type: 'scatter',
+                        fill: 'tonexty',
+                        line: { color: colors[0] },
+                        marker: { color: colors[0] },
+                        text: amounts.map(amount => `${amount.toLocaleString()} FCFA`),
+                        textposition: 'top center',
+                        hovertemplate: '<b>%{x}</b><br>Montant: %{y:,.0f} FCFA<extra></extra>'
+                    }];
+                    break;
+                    
+                case 'radar':
+                    trace = [{
+                        r: amounts,
+                        theta: categories.map(cat => getCategoryLabel(cat)),
+                        type: 'scatterpolar',
+                        fill: 'toself',
+                        line: { color: colors[0] },
+                        marker: { color: colors[0] },
+                        hovertemplate: '<b>%{theta}</b><br>Montant: %{r:,.0f} FCFA<extra></extra>'
+                    }];
+                    layout.polar = {
+                        radialaxis: {
+                            visible: true,
+                            range: [0, Math.max(...amounts) * 1.1]
+                        }
+                    };
+                    layout.title = 'Répartition radar';
+                    break;
+                    
+                default:
+                    trace = [{
+                        x: categories.map(cat => getCategoryLabel(cat)),
+                        y: amounts,
+                        type: 'bar',
+                        marker: { color: colors },
+                        text: amounts.map(amount => `${amount.toLocaleString()} FCFA`),
+                        textposition: 'auto',
+                        hovertemplate: '<b>%{x}</b><br>Montant: %{y:,.0f} FCFA<extra></extra>'
+                    }];
+            }
+            
+            // Afficher le graphique
+            const chartContainer = document.getElementById('analytics-chart');
+            if (chartContainer) {
+                Plotly.newPlot('analytics-chart', trace, layout);
+            }
+            
+            // Générer les recommandations
+            generateAnalyticsRecommendations(transactions, categoryData);
+        }
+
+        function generateAnalyticsRecommendations(transactions, categoryData) {
+            const container = document.getElementById('analytics-recommendations-container');
+            if (!container) return;
+            
+            const totalExpenses = transactions.filter(t => t.type === 'depense')
+                .reduce((sum, t) => sum + t.amount, 0);
+            const totalIncome = transactions.filter(t => t.type === 'revenu')
+                .reduce((sum, t) => sum + t.amount, 0);
+            const balance = totalIncome - totalExpenses;
+            
+            const recommendations = [];
+            
+            // Recommandation basée sur le solde
+            if (balance < 0) {
+                recommendations.push({
+                    type: 'danger',
+                    icon: '🚨',
+                    title: 'Solde négatif',
+                    message: `Votre solde est négatif de ${Math.abs(balance).toLocaleString()} FCFA. Réduisez vos dépenses ou augmentez vos revenus.`,
+                    stats: `Solde: ${balance.toLocaleString()} FCFA`,
+                    action: 'Revoir le budget'
+                });
+            } else if (balance > 0) {
+                recommendations.push({
+                    type: 'success',
+                    icon: '✅',
+                    title: 'Solde positif',
+                    message: `Excellent ! Votre solde est positif de ${balance.toLocaleString()} FCFA.`,
+                    stats: `Solde: +${balance.toLocaleString()} FCFA`,
+                    action: 'Continuer'
+                });
+            }
+            
+            // Recommandation basée sur la concentration des dépenses
+            const categories = Object.keys(categoryData);
+            if (categories.length > 0) {
+                const maxCategory = categories.reduce((a, b) => 
+                    categoryData[a] > categoryData[b] ? a : b
+                );
+                const maxAmount = categoryData[maxCategory];
+                const maxPercentage = (maxAmount / totalExpenses) * 100;
+                
+                if (maxPercentage > 40) {
+                    recommendations.push({
+                        type: 'warning',
+                        icon: '⚠️',
+                        title: 'Concentration élevée',
+                        message: `${getCategoryLabel(maxCategory)} représente ${maxPercentage.toFixed(0)}% de vos dépenses.`,
+                        stats: `${maxAmount.toLocaleString()} FCFA sur ${totalExpenses.toLocaleString()} FCFA`,
+                        action: 'Diversifier'
+                    });
+                }
+            }
+            
+            // Recommandation basée sur les tendances
+            const months = [...new Set(transactions.map(t => t.date.substring(0, 7)))].sort();
+            if (months.length >= 2) {
+                const lastMonth = months[months.length - 1];
+                const previousMonth = months[months.length - 2];
+                
+                const lastMonthExpenses = transactions
+                    .filter(t => t.date.startsWith(lastMonth) && t.type === 'depense')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                const previousMonthExpenses = transactions
+                    .filter(t => t.date.startsWith(previousMonth) && t.type === 'depense')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                const change = ((lastMonthExpenses - previousMonthExpenses) / previousMonthExpenses) * 100;
+                
+                if (change > 20) {
+                    recommendations.push({
+                        type: 'danger',
+                        icon: '📈',
+                        title: 'Augmentation importante',
+                        message: `Vos dépenses ont augmenté de ${change.toFixed(0)}% par rapport au mois précédent.`,
+                        stats: `${lastMonthExpenses.toLocaleString()} vs ${previousMonthExpenses.toLocaleString()} FCFA`,
+                        action: 'Analyser'
+                    });
+                } else if (change < -10) {
+                    recommendations.push({
+                        type: 'success',
+                        icon: '📉',
+                        title: 'Réduction des dépenses',
+                        message: `Vos dépenses ont diminué de ${Math.abs(change).toFixed(0)}% par rapport au mois précédent.`,
+                        stats: `${lastMonthExpenses.toLocaleString()} vs ${previousMonthExpenses.toLocaleString()} FCFA`,
+                        action: 'Continuer'
+                    });
+                }
+            }
+            
+            // Afficher les recommandations
+            container.innerHTML = '';
+            recommendations.forEach(rec => {
+                const card = document.createElement('div');
+                card.className = `analytics-recommendation-card ${rec.type}`;
+                card.innerHTML = `
+                    <div class="recommendation-header">
+                        <span class="recommendation-icon">${rec.icon}</span>
+                        <h4>${rec.title}</h4>
+                    </div>
+                    <p>${rec.message}</p>
+                    <div class="recommendation-stats">
+                        <span>${rec.stats}</span>
+                    </div>
+                    <div class="recommendation-action">
+                        <button class="btn-small">${rec.action}</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            
+            // Message si aucune recommandation
+            if (recommendations.length === 0) {
+                container.innerHTML = `
+                    <div class="analytics-recommendation-card success">
+                        <div class="recommendation-header">
+                            <span class="recommendation-icon">✅</span>
+                            <h4>Excellente gestion</h4>
+                        </div>
+                        <p>Vos finances semblent bien équilibrées. Continuez vos bonnes habitudes !</p>
+                        <div class="recommendation-stats">
+                            <span>Solde: ${balance.toLocaleString()} FCFA</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function updateEvolution() {
+            const period = document.getElementById('analytics-period').value;
+            const evolutionType = document.getElementById('evolution-type').value;
+            
+            const transactions = getFilteredTransactions(period);
+            
+            // Grouper par mois
+            const monthlyData = {};
+            transactions.forEach(transaction => {
+                const month = transaction.date.substring(0, 7);
+                if (!monthlyData[month]) {
+                    monthlyData[month] = { revenus: 0, depenses: 0 };
+                }
+                monthlyData[month][transaction.type] += transaction.amount;
+            });
+            
+            const months = Object.keys(monthlyData).sort();
+            const revenus = months.map(month => monthlyData[month].revenus);
+            const depenses = months.map(month => monthlyData[month].depenses);
+            
+            // Calculer les moyennes
+            const avgRevenus = revenus.reduce((sum, val) => sum + val, 0) / revenus.length || 0;
+            const avgDepenses = depenses.reduce((sum, val) => sum + val, 0) / depenses.length || 0;
+            
+            document.getElementById('avg-income').textContent = `${avgRevenus.toLocaleString()} FCFA`;
+            document.getElementById('avg-expenses').textContent = `${avgDepenses.toLocaleString()} FCFA`;
+            
+            // Tendance
+            const trend = avgRevenus - avgDepenses;
+            const trendElement = document.getElementById('trend-indicator');
+            trendElement.textContent = trend > 0 ? '📈 Positive' : trend < 0 ? '📉 Négative' : '➡️ Stable';
+            trendElement.className = 'stat-value ' + (trend > 0 ? 'positive' : trend < 0 ? 'negative' : 'neutral');
+            
+            // Graphique d'évolution
+            let trace;
+            if (evolutionType === 'line') {
+                trace = [
+                    {
+                        x: months.map(m => formatMonth(m)),
+                        y: revenus,
+                        type: 'scatter',
+                        name: 'Revenus',
+                        line: { color: '#28a745' }
+                    },
+                    {
+                        x: months.map(m => formatMonth(m)),
+                        y: depenses,
+                        type: 'scatter',
+                        name: 'Dépenses',
+                        line: { color: '#dc3545' }
+                    }
+                ];
+            } else if (evolutionType === 'area') {
+                trace = [
+                    {
+                        x: months.map(m => formatMonth(m)),
+                        y: revenus,
+                        type: 'scatter',
+                        fill: 'tonexty',
+                        name: 'Revenus',
+                        line: { color: '#28a745' }
+                    },
+                    {
+                        x: months.map(m => formatMonth(m)),
+                        y: depenses,
+                        type: 'scatter',
+                        fill: 'tonexty',
+                        name: 'Dépenses',
+                        line: { color: '#dc3545' }
+                    }
+                ];
+            } else if (evolutionType === 'bar') {
+                trace = [
+                    {
+                        x: months.map(m => formatMonth(m)),
+                        y: revenus,
+                        type: 'bar',
+                        name: 'Revenus',
+                        marker: { color: '#28a745' }
+                    },
+                    {
+                        x: months.map(m => formatMonth(m)),
+                        y: depenses,
+                        type: 'bar',
+                        name: 'Dépenses',
+                        marker: { color: '#dc3545' }
+                    }
+                ];
+            }
+            
+            const layout = {
+                title: 'Évolution mensuelle',
+                height: 350,
+                margin: { t: 50, b: 50, l: 50, r: 50 },
+                barmode: 'group'
+            };
+            
+            Plotly.newPlot('evolution-chart', trace, layout);
+        }
+
+        function getFilteredTransactions(period) {
+            const transactions = loadTransactions();
+            const now = new Date();
+            let startDate;
+            
+            switch (period) {
+                case '7d':
+                    startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    break;
+                case '1':
+                    startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+                    break;
+                case '3':
+                    startDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+                    break;
+                case '6':
+                    startDate = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
+                    break;
+                case '12':
+                    startDate = new Date(now.getFullYear(), now.getMonth() - 12, now.getDate());
+                    break;
+                default:
+                    startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+            }
+            
+            return transactions.filter(t => new Date(t.date) >= startDate);
+        }
+
+        function saveBudgets() {
+            const budgets = loadBudgets();
+            
+            // Sauvegarder les budgets actuels
+            localStorage.setItem('budgets', JSON.stringify(budgets));
+            
+            // Notification de succès
+            showNotification('Budgets sauvegardés avec succès !', 'success');
+            
+            // Recharger les données pour mettre à jour l'affichage
+            loadBudgetsData();
+        }
+
+        function resetBudgets() {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser tous les budgets ?')) {
+                localStorage.removeItem('budgets');
+                showNotification('Budgets réinitialisés', 'info');
+                loadBudgetsData();
+            }
+        }
+
+        function exportBudgets() {
+            const budgets = loadBudgets();
+            const headers = ['Catégorie', 'Budget'];
+            const csvContent = [
+                headers.join(','),
+                ...Object.entries(budgets).map(([category, budget]) => [
+                    getCategoryLabel(category),
+                    budget.toLocaleString()
+                ]).join('\n')
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `budgets_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            showNotification('Budgets exportés en CSV !', 'success');
+        }
+
+        function exportToCSV() {
+            const transactions = loadTransactions();
+            const headers = ['Date', 'Type', 'Catégorie', 'Montant', 'Paiement', 'Description'];
+            const csvContent = [
+                headers.join(','),
+                ...transactions.map(t => [
+                    t.date,
+                    t.type,
+                    getCategoryLabel(t.category),
+                    t.amount,
+                    getPaymentMethodLabel(t.paymentMethod),
+                    t.description
+                ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            showNotification('Données exportées en CSV !', 'success');
+        }
+
+        function exportToJSON() {
+            const transactions = loadTransactions();
+            const data = {
+                transactions: transactions,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `transactions_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            showNotification('Données exportées en JSON !', 'success');
+        }
+
+        function activateAnalyticsTab() {
+            // Forcer l'activation de l'onglet Analyses
+            const analyticsBtn = document.getElementById('analytics-tab-btn');
+            const budgetsBtn = document.getElementById('budgets-tab-btn');
+            const analyticsContent = document.getElementById('analytics-tab');
+            const budgetsContent = document.getElementById('budgets-tab');
+            
+            // Désactiver l'onglet Budgets
+            if (budgetsBtn) budgetsBtn.classList.remove('active');
+            if (budgetsContent) budgetsContent.classList.remove('active');
+            
+            // Activer l'onglet Analyses
+            if (analyticsBtn) {
+                analyticsBtn.classList.add('active');
+                analyticsBtn.style.color = 'var(--primary-green)';
+                analyticsBtn.style.background = 'var(--card-background)';
+                analyticsBtn.style.borderBottomColor = 'var(--primary-green)';
+            }
+            
+            if (analyticsContent) {
+                analyticsContent.classList.add('active');
+                analyticsContent.style.display = 'block';
+            }
+            
+            // Charger les données d'analyse
+            loadAnalyticsData();
+            
+            // Notification de succès
+            showNotification('✅ Section Analyses activée avec succès !', 'success');
+            
+            // Faire défiler vers le haut de la section
+            if (analyticsContent) {
+                analyticsContent.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            return true;
+        }
+
+    </script>
+</body>
+</html>

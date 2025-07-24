@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sauvegarde - Mon Budget Malin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <script src="plotly.js"></script>
+</head>
+<body>
+    <header>
+        <h1>💾 Sauvegarde et restauration</h1>
+        <p>Gérez vos données en toute sécurité</p>
+    </header>
+
+    <nav class="breadcrumb">
+        <a href="index.html">🏠 Accueil</a> > Sauvegarde
+    </nav>
+
+    <section id="export-section">
+        <h2>📤 Exporter vos données</h2>
+        <p>Sauvegardez toutes vos transactions et budgets dans un fichier JSON.</p>
+        <div class="export-info">
+            <div class="info-card">
+                <h3>📊 Données incluses</h3>
+                <ul>
+                    <li>Toutes vos transactions</li>
+                    <li>Vos budgets mensuels</li>
+                    <li>Date d'export</li>
+                    <li>Version de l'application</li>
+                </ul>
+            </div>
+            <div class="info-card">
+                <h3>🔒 Sécurité</h3>
+                <ul>
+                    <li>Données chiffrées localement</li>
+                    <li>Aucune transmission réseau</li>
+                    <li>Fichier personnel</li>
+                </ul>
+            </div>
+        </div>
+        <button id="export-json">📤 Exporter (JSON)</button>
+    </section>
+
+    <section id="import-section">
+        <h2>📥 Importer vos données</h2>
+        <p>Restaurez vos données depuis un fichier de sauvegarde.</p>
+        <div class="import-warning">
+            <div class="warning-card">
+                <h3>⚠️ Attention</h3>
+                <p>L'import remplacera toutes vos données actuelles. Assurez-vous de faire une sauvegarde avant.</p>
+            </div>
+        </div>
+        <div class="data-controls">
+            <div class="import-group">
+                <input type="file" id="import-file" accept="application/json">
+                <button id="import-json">📥 Importer</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="backup-tips">
+        <h2>💡 Conseils de sauvegarde</h2>
+        <div class="tips-grid">
+            <div class="tip-card">
+                <h3>📅 Sauvegardez régulièrement</h3>
+                <p>Faites une sauvegarde au moins une fois par mois pour ne pas perdre vos données.</p>
+            </div>
+            <div class="tip-card">
+                <h3>💾 Stockage sécurisé</h3>
+                <p>Gardez vos fichiers de sauvegarde dans un endroit sûr (cloud, disque externe).</p>
+            </div>
+            <div class="tip-card">
+                <h3>🔄 Testez vos sauvegardes</h3>
+                <p>Vérifiez que vos fichiers d'export peuvent être importés correctement.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="data-stats">
+        <h2>📊 Statistiques de vos données</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>📝 Transactions</h3>
+                <p id="total-transactions">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>📅 Première transaction</h3>
+                <p id="first-transaction">-</p>
+            </div>
+            <div class="stat-card">
+                <h3>📅 Dernière transaction</h3>
+                <p id="last-transaction">-</p>
+            </div>
+            <div class="stat-card">
+                <h3>💾 Taille des données</h3>
+                <p id="data-size">0 KB</p>
+            </div>
+        </div>
+    </section>
+
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .catch(function (error) {
+                    console.log('ServiceWorker registration failed:', error);
+                });
+        }
+    </script>
+</body>
+</html> 
