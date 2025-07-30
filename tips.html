@@ -9,10 +9,39 @@
     <script src="plotly.js"></script>
 </head>
 <body>
-    <header>
-        <h1>💡 Conseils et astuces</h1>
-        <p>Maîtrisez votre budget avec nos conseils</p>
-    </header>
+    <!-- Vérification d'authentification -->
+    <script>
+        // Vérifier si l'utilisateur est connecté
+        function checkAuth() {
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+        }
+        
+        // Exécuter la vérification au chargement
+        checkAuth();
+    </script>
+
+    <!-- Barre de navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="icon-192.png" alt="Logo" class="nav-logo">
+                <span class="nav-title">💰 Mon Budget Malin</span>
+            </div>
+            <div class="nav-user">
+                <div id="connection-status" class="connection-status">
+                    <span class="status-indicator offline">🔴 Hors ligne</span>
+                </div>
+                <div id="user-info" class="user-info">
+                    <span id="user-name" class="user-name">👤 <span id="display-name">Utilisateur</span></span>
+                    <button id="logout-btn" class="logout-btn">🚪 Déconnexion</button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
     <nav class="breadcrumb">
         <a href="index.html">🏠 Accueil</a> > Conseils
@@ -95,58 +124,29 @@
         <div class="emergency-info">
             <div class="info-card">
                 <h3>💡 Pourquoi un fonds d'urgence ?</h3>
-                <ul>
-                    <li>Réparations imprévues (voiture, maison)</li>
-                    <li>Frais médicaux</li>
-                    <li>Perte d'emploi</li>
-                    <li>Dépenses urgentes</li>
-                </ul>
-            </div>
-            <div class="info-card">
-                <h3>💰 Combien épargner ?</h3>
-                <ul>
-                    <li>Minimum : 3 mois de dépenses</li>
-                    <li>Idéal : 6 mois de dépenses</li>
-                    <li>Commencez petit : 500€ puis augmentez</li>
-                    <li>Placez-le sur un compte séparé</li>
-                </ul>
+                <p>Un fonds d'urgence vous protège des imprévus (panne de voiture, perte d'emploi, etc.)</p>
+                <p><strong>Objectif :</strong> 3 à 6 mois de dépenses</p>
             </div>
         </div>
     </section>
 
-    <section id="investment-basics">
-        <h2>📈 Bases de l'investissement</h2>
-        <div class="investment-tips">
-            <div class="tip-card">
-                <h3>🎯 Commencez tôt</h3>
-                <p>Plus vous commencez tôt, plus l'effet des intérêts composés est important.</p>
-            </div>
-            <div class="tip-card">
-                <h3>📊 Diversifiez</h3>
-                <p>Ne mettez pas tous vos œufs dans le même panier.</p>
-            </div>
-            <div class="tip-card">
-                <h3>📚 Informez-vous</h3>
-                <p>Lisez, suivez des formations, consultez des experts.</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="personalized-advice">
-        <h2>🎯 Conseils personnalisés</h2>
-        <div id="personalized-container">
-            <!-- Les conseils personnalisés seront générés dynamiquement -->
-        </div>
-    </section>
-
-    <script src="app.js"></script>
     <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js')
-                .catch(function (error) {
-                    console.log('ServiceWorker registration failed:', error);
-                });
+        // Afficher le nom de l'utilisateur
+        function displayUserInfo() {
+            const userName = localStorage.getItem('user_name') || 'Utilisateur';
+            document.getElementById('display-name').textContent = userName;
         }
+
+        // Gérer la déconnexion
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_email');
+            localStorage.removeItem('user_name');
+            window.location.href = 'login.html';
+        });
+
+        // Afficher les informations utilisateur au chargement
+        displayUserInfo();
     </script>
 </body>
 </html> 

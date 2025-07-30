@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Mon Budget Malin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="enhanced-styles.css">
+    <link rel="stylesheet" href="modern-components.css">
+    <script src="plotly.js"></script>
+</head>
+<body>
+    <!-- Vérification d'authentification -->
+    <script>
+        // Vérifier si l'utilisateur est connecté
+        function checkAuth() {
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+        }
+        
+        // Exécuter la vérification au chargement
+        checkAuth();
+    </script>
+
+    <!-- Barre de navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="icon-192.png" alt="Logo" class="nav-logo">
+                <span class="nav-title">💰 Mon Budget Malin</span>
+            </div>
+            <div class="nav-user">
+                <div id="connection-status" class="connection-status">
+                    <span class="status-indicator offline">🔴 Hors ligne</span>
+                </div>
+                <div id="user-info" class="user-info">
+                    <span id="user-name" class="user-name">👤 <span id="display-name">Utilisateur</span></span>
+                    <button id="logout-btn" class="logout-btn">🚪 Déconnexion</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <nav class="breadcrumb">
+        <a href="index.html">🏠 Accueil</a>
+        <span>📊 Dashboard</span>
+    </nav>
+
+    <div class="dashboard-container">
+        <!-- Widgets principaux -->
+        <div class="dashboard-widgets">
+            <!-- Widget Résumé Financier -->
+            <div class="widget financial-summary">
+                <h3>💰 Résumé Financier</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span class="summary-label">Revenus du mois</span>
+                        <span id="monthly-revenues" class="summary-value">0 FCFA</span>
+                        <span class="summary-trend positive">↗️ +12%</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Dépenses du mois</span>
+                        <span id="monthly-expenses" class="summary-value">0 FCFA</span>
+                        <span class="summary-trend negative">↘️ -8%</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Solde actuel</span>
+                        <span id="current-balance" class="summary-value">0 FCFA</span>
+                        <span class="summary-trend positive">↗️ +5%</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Épargne</span>
+                        <span id="savings-rate" class="summary-value">0%</span>
+                        <span class="summary-trend positive">↗️ +2%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Widget Analyses Prédictives -->
+            <div class="widget predictive-analytics">
+                <h3>🔮 Analyses Prédictives</h3>
+                <div class="prediction-content">
+                    <div class="prediction-item">
+                        <span class="prediction-label">Dépenses prévues (prochain mois)</span>
+                        <span id="predicted-expenses" class="prediction-value">0 FCFA</span>
+                    </div>
+                    <div class="prediction-item">
+                        <span class="prediction-label">Objectif d'épargne atteignable</span>
+                        <span id="savings-goal" class="prediction-value">0 FCFA</span>
+                    </div>
+                    <div class="prediction-item">
+                        <span class="prediction-label">Tendance</span>
+                        <span id="trend-indicator" class="prediction-value">📈 En hausse</span>
+                    </div>
+                </div>
+                <div id="prediction-chart" class="prediction-chart">
+                    <div class="chart-loading">
+                        <div class="loading-spinner"></div>
+                        <p>Chargement des prédictions...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Widget Alertes de Budget -->
+            <div class="widget budget-alerts">
+                <h3>⚠️ Alertes de Budget</h3>
+                <div id="alerts-list" class="alerts-list">
+                    <div class="alert-item success">
+                        <span class="alert-icon">✅</span>
+                        <span class="alert-text">Tous vos budgets sont respectés ce mois-ci !</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Afficher le nom de l'utilisateur
+        function displayUserInfo() {
+            const userName = localStorage.getItem('user_name') || 'Utilisateur';
+            document.getElementById('display-name').textContent = userName;
+        }
+
+        // Gérer la déconnexion
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_email');
+            localStorage.removeItem('user_name');
+            window.location.href = 'login.html';
+        });
+
+        // Afficher les informations utilisateur au chargement
+        displayUserInfo();
+
+        // Charger les données du dashboard
+        function loadDashboardData() {
+            const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+            updateDashboardSummary(transactions);
+        }
+
+        // Mettre à jour le résumé du dashboard
+        function updateDashboardSummary(transactions) {
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            const monthTransactions = transactions.filter(t => t.date.startsWith(currentMonth));
+            
+            const totalRevenus = monthTransactions
+                .filter(t => t.type === 'revenu')
+                .reduce((sum, t) => sum + t.amount, 0);
+            
+            const totalDepenses = monthTransactions
+                .filter(t => t.type === 'depense')
+                .reduce((sum, t) => sum + t.amount, 0);
+            
+            const solde = totalRevenus - totalDepenses;
+            const savingsRate = totalRevenus > 0 ? Math.round((solde / totalRevenus) * 100) : 0;
+
+            document.getElementById('monthly-revenues').textContent = formatAmount(totalRevenus) + ' FCFA';
+            document.getElementById('monthly-expenses').textContent = formatAmount(totalDepenses) + ' FCFA';
+            document.getElementById('current-balance').textContent = formatAmount(Math.abs(solde)) + ' FCFA';
+            document.getElementById('savings-rate').textContent = savingsRate + '%';
+        }
+
+        function formatAmount(amount) {
+            return new Intl.NumberFormat('fr-FR').format(amount);
+        }
+
+        // Charger les données au démarrage
+        loadDashboardData();
+    </script>
+</body>
+</html> 

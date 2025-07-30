@@ -2,20 +2,55 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budgets & Analyses - Mon Budget Malin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2196F3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Gestion des budgets">
+    <title>Gestion des budgets - Mon Budget Malin</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <script src="plotly.js"></script>
 </head>
 <body>
-    <header>
-        <h1>📊 Budgets & Analyses</h1>
-        <p>Gérez vos budgets et analysez vos dépenses</p>
-    </header>
+    <!-- Vérification d'authentification -->
+    <script>
+        // Vérifier si l'utilisateur est connecté
+        function checkAuth() {
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+        }
+        
+        // Exécuter la vérification au chargement
+        checkAuth();
+    </script>
+
+    <!-- Barre de navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="icon-192.png" alt="Logo" class="nav-logo">
+                <span class="nav-title">💰 Mon Budget Malin</span>
+            </div>
+            <div class="nav-user">
+                <div id="connection-status" class="connection-status">
+                    <span class="status-indicator offline">🔴 Hors ligne</span>
+                </div>
+                <div id="user-info" class="user-info">
+                    <span id="user-name" class="user-name">👤 <span id="display-name">Utilisateur</span></span>
+                    <button id="logout-btn" class="logout-btn">🚪 Déconnexion</button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
     <nav class="breadcrumb">
-        <a href="index.html">🏠 Accueil</a> > Budgets & Analyses
+        <a href="index.html">🏠 Accueil</a> > Budgets
     </nav>
 
     <!-- Onglets de navigation -->
@@ -28,26 +63,6 @@
     <section id="budgets-tab" class="tab-content active">
         <h2>🎯 Gestion des budgets</h2>
         
-        <!-- Résumé des budgets -->
-        <div class="budget-overview">
-            <div class="budget-stat">
-                <span class="stat-label">Budget total :</span>
-                <span id="total-budget" class="stat-value">0 FCFA</span>
-            </div>
-            <div class="budget-stat">
-                <span class="stat-label">Dépensé :</span>
-                <span id="total-spent" class="stat-value">0 FCFA</span>
-            </div>
-            <div class="budget-stat">
-                <span class="stat-label">Reste :</span>
-                <span id="total-remaining" class="stat-value">0 FCFA</span>
-            </div>
-            <div class="budget-stat">
-                <span class="stat-label">Progression :</span>
-                <span id="total-progress" class="stat-value">0%</span>
-            </div>
-        </div>
-
         <!-- Alertes de budget -->
         <div id="budget-alerts" class="budget-alerts">
             <!-- Les alertes seront générées dynamiquement -->
@@ -181,6 +196,26 @@
     <section id="analytics-tab" class="tab-content">
         <h2>📊 Analyses et statistiques</h2>
         
+        <!-- Résumé des budgets -->
+        <div class="budget-overview">
+            <div class="budget-stat">
+                <span class="stat-label">Budget total :</span>
+                <span id="total-budget" class="stat-value">0 FCFA</span>
+            </div>
+            <div class="budget-stat">
+                <span class="stat-label">Dépensé :</span>
+                <span id="total-spent" class="stat-value">0 FCFA</span>
+            </div>
+            <div class="budget-stat">
+                <span class="stat-label">Reste :</span>
+                <span id="total-remaining" class="stat-value">0 FCFA</span>
+            </div>
+            <div class="budget-stat">
+                <span class="stat-label">Progression :</span>
+                <span id="total-progress" class="stat-value">0%</span>
+            </div>
+        </div>
+        
         <!-- Filtres pour les analyses -->
         <div class="analytics-filters">
             <div class="filter-group">
@@ -263,8 +298,12 @@
 
     <script src="app.js"></script>
     <script>
-        // Initialisation
+        // Initialisation spécifique pour mobile
         document.addEventListener('DOMContentLoaded', () => {
+            // Optimisations pour mobile
+            optimizeForMobile();
+            
+            // Initialisation de la page
             initializeBudgetsPage();
             
             // Activer explicitement le bouton Analyses après un court délai
@@ -272,6 +311,40 @@
                 activateAnalyticsTab();
             }, 500);
         });
+
+        function optimizeForMobile() {
+            // Désactiver le zoom sur les champs de saisie
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    input.style.fontSize = '16px';
+                });
+            });
+            
+            // Optimiser les interactions tactiles
+            const buttons = document.querySelectorAll('button, .nav-card');
+            buttons.forEach(button => {
+                button.addEventListener('touchstart', () => {
+                    button.style.transform = 'scale(0.98)';
+                });
+                
+                button.addEventListener('touchend', () => {
+                    button.style.transform = 'scale(1)';
+                });
+            });
+            
+            // Optimiser les onglets pour mobile
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.addEventListener('touchstart', () => {
+                    button.style.transform = 'scale(0.95)';
+                });
+                
+                button.addEventListener('touchend', () => {
+                    button.style.transform = 'scale(1)';
+                });
+            });
+        }
 
         function initializeBudgetsPage() {
             // Charger les données
@@ -555,30 +628,19 @@
                 t.date.startsWith(currentMonth) && t.type === 'depense'
             );
             
-            // Calculer les totaux
+            // Calculer les totaux pour référence interne
             const totalBudget = Object.values(budgets).reduce((sum, budget) => sum + budget, 0);
             const totalSpent = monthTransactions.reduce((sum, t) => sum + t.amount, 0);
             const totalRemaining = totalBudget - totalSpent;
             const totalProgress = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
             
-            // Mettre à jour l'affichage avec des valeurs par défaut si nécessaire
-            document.getElementById('total-budget').textContent = `${totalBudget.toLocaleString()} FCFA`;
-            document.getElementById('total-spent').textContent = `${totalSpent.toLocaleString()} FCFA`;
-            document.getElementById('total-remaining').textContent = `${totalRemaining.toLocaleString()} FCFA`;
-            document.getElementById('total-progress').textContent = `${totalProgress.toFixed(0)}%`;
-            
-            // Appliquer les couleurs dynamiques
-            const progressElement = document.getElementById('total-progress');
-            progressElement.className = 'stat-value ' + 
-                (totalProgress > 100 ? 'negative' : totalProgress > 80 ? 'warning' : 'positive');
-            
-            const remainingElement = document.getElementById('total-remaining');
-            remainingElement.className = 'stat-value ' + 
-                (totalRemaining < 0 ? 'negative' : 'positive');
-            
-            const spentElement = document.getElementById('total-spent');
-            spentElement.className = 'stat-value ' + 
-                (totalSpent > totalBudget ? 'negative' : 'positive');
+            // Les éléments de résumé ont été supprimés, donc on ne les met plus à jour
+            console.log('Résumé des budgets:', {
+                totalBudget: totalBudget.toLocaleString() + ' FCFA',
+                totalSpent: totalSpent.toLocaleString() + ' FCFA',
+                totalRemaining: totalRemaining.toLocaleString() + ' FCFA',
+                totalProgress: totalProgress.toFixed(0) + '%'
+            });
         }
 
         function addBudget() {
@@ -985,6 +1047,100 @@ Transactions: ${monthTransactions.length}
             return icons[category] || '💰';
         }
 
+        function getCategoryLabel(category) {
+            const labels = {
+                'nourriture': '🍽️ Nourriture',
+                'transport': '🚗 Transport',
+                'logement': '🏠 Logement',
+                'sante': '🏥 Santé',
+                'communication': '📱 Communication',
+                'loisirs': '🎮 Loisirs',
+                'vetements': '👕 Vêtements',
+                'education': '📚 Éducation',
+                'salaire': '💰 Salaire',
+                'bonus': '🎁 Bonus',
+                'freelance': '💼 Freelance',
+                'investissement': '📈 Investissement',
+                'divers': '💸 Divers'
+            };
+            return labels[category] || category;
+        }
+
+        function getCategoryColor(index) {
+            const colors = [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+            ];
+            return colors[index % colors.length];
+        }
+
+        function loadTransactions() {
+            try {
+                const data = JSON.parse(localStorage.getItem('transactions'));
+                return Array.isArray(data) ? data : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function loadBudgets() {
+            try {
+                const data = JSON.parse(localStorage.getItem('budgets'));
+                return data && typeof data === 'object' ? data : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Créer une notification simple
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 10000;
+                max-width: 300px;
+                word-wrap: break-word;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                transition: all 0.3s ease;
+            `;
+            
+            // Couleurs selon le type
+            switch (type) {
+                case 'success':
+                    notification.style.backgroundColor = '#4CAF50';
+                    break;
+                case 'warning':
+                    notification.style.backgroundColor = '#FF9800';
+                    break;
+                case 'error':
+                    notification.style.backgroundColor = '#F44336';
+                    break;
+                default:
+                    notification.style.backgroundColor = '#2196F3';
+            }
+            
+            document.body.appendChild(notification);
+            
+            // Supprimer après 3 secondes
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
         function updateAnalytics() {
             const period = document.getElementById('analytics-period').value;
             const chartType = document.getElementById('chart-type').value;
@@ -1379,103 +1535,210 @@ Transactions: ${monthTransactions.length}
 
         function exportBudgets() {
             const budgets = loadBudgets();
-            const headers = ['Catégorie', 'Budget'];
-            const csvContent = [
-                headers.join(','),
-                ...Object.entries(budgets).map(([category, budget]) => [
-                    getCategoryLabel(category),
-                    budget.toLocaleString()
-                ]).join('\n')
-            ].join('\n');
-            
-            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const dataStr = JSON.stringify(budgets, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `budgets_${new Date().toISOString().split('T')[0]}.csv`;
+            link.href = url;
+            link.download = 'budgets.json';
             link.click();
+            URL.revokeObjectURL(url);
+            showNotification('Budgets exportés avec succès !', 'success');
+        }
+
+        // Fonctions de gestion des onglets
+        function showTab(tabName) {
+            // Masquer tous les contenus d'onglets
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
             
-            showNotification('Budgets exportés en CSV !', 'success');
+            // Désactiver tous les boutons d'onglets
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Afficher le contenu de l'onglet sélectionné
+            const selectedTab = document.getElementById(tabName + '-tab');
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+            
+            // Activer le bouton de l'onglet sélectionné
+            const selectedButton = document.getElementById(tabName + '-tab-btn');
+            if (selectedButton) {
+                selectedButton.classList.add('active');
+            }
+            
+            // Charger les données appropriées
+            if (tabName === 'budgets') {
+                loadBudgetsData();
+            } else if (tabName === 'analytics') {
+                loadAnalyticsData();
+            }
+        }
+
+        function activateAnalyticsTab() {
+            showTab('analytics');
+        }
+
+        function loadAnalyticsData() {
+            // Mettre à jour les analyses
+            updateAnalytics();
+            updateEvolution();
+            
+            // Générer les recommandations
+            const transactions = loadTransactions();
+            const period = document.getElementById('analytics-period').value;
+            const filteredTransactions = getFilteredTransactions(period);
+            
+            // Grouper par catégorie pour les recommandations
+            const categoryData = {};
+            filteredTransactions.filter(t => t.type === 'depense').forEach(transaction => {
+                if (!categoryData[transaction.category]) {
+                    categoryData[transaction.category] = 0;
+                }
+                categoryData[transaction.category] += transaction.amount;
+            });
+            
+            generateAnalyticsRecommendations(filteredTransactions, categoryData);
+            
+            // Mettre à jour le résumé des budgets
+            updateBudgetOverview(loadTransactions(), loadBudgets());
+        }
+
+        function generateAnalyticsRecommendations(transactions, categoryData) {
+            const container = document.getElementById('analytics-recommendations-container');
+            if (!container) return;
+            
+            const recommendations = [];
+            
+            // Analyser les dépenses par catégorie
+            const sortedCategories = Object.entries(categoryData)
+                .sort(([,a], [,b]) => b - a);
+            
+            if (sortedCategories.length > 0) {
+                const [maxCategory, maxAmount] = sortedCategories[0];
+                const totalExpenses = Object.values(categoryData).reduce((sum, amount) => sum + amount, 0);
+                const maxPercentage = (maxAmount / totalExpenses) * 100;
+                
+                if (maxPercentage > 50) {
+                    recommendations.push({
+                        type: 'warning',
+                        icon: '⚠️',
+                        title: 'Catégorie dominante',
+                        message: `${getCategoryLabel(maxCategory)} représente ${maxPercentage.toFixed(0)}% de vos dépenses.`,
+                        suggestion: 'Considérez diversifier vos dépenses pour mieux équilibrer votre budget.'
+                    });
+                }
+            }
+            
+            // Analyser la tendance des dépenses
+            const monthlyData = calculateMonthlyAverages(transactions);
+            const trend = determineTrend(monthlyData);
+            
+            if (trend === 'increasing') {
+                recommendations.push({
+                    type: 'danger',
+                    icon: '📈',
+                    title: 'Tendance à la hausse',
+                    message: 'Vos dépenses augmentent mois après mois.',
+                    suggestion: 'Identifiez les causes et ajustez votre budget en conséquence.'
+                });
+            } else if (trend === 'decreasing') {
+                recommendations.push({
+                    type: 'success',
+                    icon: '📉',
+                    title: 'Tendance positive',
+                    message: 'Vos dépenses diminuent, excellent travail !',
+                    suggestion: 'Continuez sur cette voie et épargnez davantage.'
+                });
+            }
+            
+            // Afficher les recommandations
+            if (recommendations.length === 0) {
+                container.innerHTML = `
+                    <div class="recommendation-item success">
+                        <div class="recommendation-icon">✅</div>
+                        <div class="recommendation-content">
+                            <h4>Pas de problème détecté</h4>
+                            <p>Vos habitudes de dépenses semblent équilibrées.</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = recommendations.map(rec => `
+                    <div class="recommendation-item ${rec.type}">
+                        <div class="recommendation-icon">${rec.icon}</div>
+                        <div class="recommendation-content">
+                            <h4>${rec.title}</h4>
+                            <p>${rec.message}</p>
+                            <small>💡 ${rec.suggestion}</small>
+                        </div>
+                    </div>
+                `).join('');
+            }
         }
 
         function exportToCSV() {
             const transactions = loadTransactions();
-            const headers = ['Date', 'Type', 'Catégorie', 'Montant', 'Paiement', 'Description'];
-            const csvContent = [
-                headers.join(','),
-                ...transactions.map(t => [
-                    t.date,
-                    t.type,
-                    getCategoryLabel(t.category),
-                    t.amount,
-                    getPaymentMethodLabel(t.paymentMethod),
-                    t.description
-                ].join(','))
-            ].join('\n');
+            const period = document.getElementById('analytics-period').value;
+            const filteredTransactions = getFilteredTransactions(period);
             
-            const blob = new Blob([csvContent], { type: 'text/csv' });
+            let csv = 'Date,Type,Catégorie,Description,Montant,Méthode de paiement\n';
+            filteredTransactions.forEach(t => {
+                csv += `${t.date},${t.type},${getCategoryLabel(t.category)},${t.description},${t.amount},${getPaymentMethodLabel(t.paymentMethod)}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+            link.download = `transactions_${period}.csv`;
             link.click();
+            URL.revokeObjectURL(link.href);
             
             showNotification('Données exportées en CSV !', 'success');
         }
 
         function exportToJSON() {
             const transactions = loadTransactions();
+            const period = document.getElementById('analytics-period').value;
+            const filteredTransactions = getFilteredTransactions(period);
+            
             const data = {
-                transactions: transactions,
-                exportDate: new Date().toISOString(),
-                version: '1.0'
+                period: period,
+                transactions: filteredTransactions,
+                exportDate: new Date().toISOString()
             };
             
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `transactions_${new Date().toISOString().split('T')[0]}.json`;
+            link.download = `transactions_${period}.json`;
             link.click();
+            URL.revokeObjectURL(link.href);
             
             showNotification('Données exportées en JSON !', 'success');
         }
 
-        function activateAnalyticsTab() {
-            // Forcer l'activation de l'onglet Analyses
-            const analyticsBtn = document.getElementById('analytics-tab-btn');
-            const budgetsBtn = document.getElementById('budgets-tab-btn');
-            const analyticsContent = document.getElementById('analytics-tab');
-            const budgetsContent = document.getElementById('budgets-tab');
-            
-            // Désactiver l'onglet Budgets
-            if (budgetsBtn) budgetsBtn.classList.remove('active');
-            if (budgetsContent) budgetsContent.classList.remove('active');
-            
-            // Activer l'onglet Analyses
-            if (analyticsBtn) {
-                analyticsBtn.classList.add('active');
-                analyticsBtn.style.color = 'var(--primary-green)';
-                analyticsBtn.style.background = 'var(--card-background)';
-                analyticsBtn.style.borderBottomColor = 'var(--primary-green)';
-            }
-            
-            if (analyticsContent) {
-                analyticsContent.classList.add('active');
-                analyticsContent.style.display = 'block';
-            }
-            
-            // Charger les données d'analyse
-            loadAnalyticsData();
-            
-            // Notification de succès
-            showNotification('✅ Section Analyses activée avec succès !', 'success');
-            
-            // Faire défiler vers le haut de la section
-            if (analyticsContent) {
-                analyticsContent.scrollIntoView({ behavior: 'smooth' });
-            }
-            
-            return true;
+        function getPaymentMethodLabel(method) {
+            const labels = {
+                'especes': '💵 Espèces',
+                'carte': '💳 Carte bancaire',
+                'mobile': '📱 Mobile money',
+                'virement': '🏦 Virement',
+                'cheque': '📄 Chèque'
+            };
+            return labels[method] || method;
         }
 
+        function formatMonth(monthStr) {
+            const [year, month] = monthStr.split('-');
+            const date = new Date(parseInt(year), parseInt(month) - 1);
+            return date.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
+        }
     </script>
 </body>
 </html>

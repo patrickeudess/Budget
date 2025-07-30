@@ -2,204 +2,155 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Budget Malin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2196F3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Mon Budget Malin">
+    <title>Mon Budget Malin - Gestion de budget intelligente</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="enhanced-styles.css">
+    <link rel="stylesheet" href="modern-components.css">
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <script src="plotly.js"></script>
-    <script src="chatbot.js"></script>
-    <script src="goals.js"></script>
-    <script src="mobile-money.js"></script>
-    <script src="education.js"></script>
-    <script src="settings.js"></script>
 </head>
 <body>
-    <header>
-        <h1>💰 Mon Budget Malin</h1>
-        <p>Gérez votre budget simplement et efficacement</p>
-    </header>
+    <!-- Vérification d'authentification -->
+    <script>
+        // Vérifier si l'utilisateur est connecté
+        function checkAuth() {
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+        }
+        
+        // Exécuter la vérification au chargement
+        checkAuth();
+    </script>
 
-    <!-- Section d'accueil claire et intuitive -->
-    <section id="welcome-section">
-        <h2>🎯 Tableau de bord</h2>
+    <!-- Barre de navigation avec gestion de connexion -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="icon-192.png" alt="Logo" class="nav-logo">
+                <span class="nav-title">💰 Mon Budget Malin</span>
+            </div>
+            <div class="nav-user">
+                <div id="connection-status" class="connection-status">
+                    <span class="status-indicator offline">🔴 Hors ligne</span>
+                </div>
+                <div id="user-info" class="user-info">
+                    <span id="user-name" class="user-name">👤 <span id="display-name">Utilisateur</span></span>
+                    <button id="logout-btn" class="logout-btn">🚪 Déconnexion</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <nav class="breadcrumb">
+        <a href="index.html">🏠 Accueil</a>
+    </nav>
+
+    <!-- Résumé rapide amélioré -->
+    <section>
+        <h2>📊 Vue d'ensemble</h2>
         <div class="quick-summary">
-            <div class="summary-card revenus" onclick="navigateTo('transactions')">
-                <h3>💰 Revenus</h3>
-                <p id="quick-total-revenus">0 FCFA</p>
-                <small>Cliquez pour ajouter</small>
+            <div class="summary-card revenus hover-scale" data-animation="slideInUp">
+                <div class="summary-icon">💰</div>
+                <h3>Revenus du mois</h3>
+                <p id="total-revenus" class="animated-value">0 FCFA</p>
+                <small>Total des entrées</small>
+                <div class="summary-trend positive">↗️ +12%</div>
             </div>
-            <div class="summary-card depenses" onclick="navigateTo('transactions')">
-                <h3>💸 Dépenses</h3>
-                <p id="quick-total-depenses">0 FCFA</p>
-                <small>Cliquez pour ajouter</small>
+            <div class="summary-card depenses hover-scale" data-animation="slideInUp">
+                <div class="summary-icon">💸</div>
+                <h3>Dépenses du mois</h3>
+                <p id="total-depenses" class="animated-value">0 FCFA</p>
+                <small>Total des sorties</small>
+                <div class="summary-trend negative">↘️ -8%</div>
             </div>
-            <div class="summary-card solde">
-                <h3>💳 Solde</h3>
-                <p id="quick-solde">0 FCFA</p>
+            <div class="summary-card solde hover-scale" data-animation="slideInUp">
+                <div class="summary-icon">💳</div>
+                <h3>Solde actuel</h3>
+                <p id="solde-actuel" class="animated-value">0 FCFA</p>
+                <small>Revenus - Dépenses</small>
+                <div class="summary-trend positive">↗️ +5%</div>
             </div>
         </div>
     </section>
 
-    <!-- Section des recommandations personnalisées -->
-    <section id="recommendations-section">
-        <h2>💡 Conseils personnalisés</h2>
-        <div id="recommendations-container">
-            <!-- Les recommandations seront générées dynamiquement -->
-        </div>
-    </section>
-
-    <!-- Navigation simplifiée vers les fonctionnalités principales -->
-    <section id="navigation-section">
-        <h2>📋 Fonctionnalités</h2>
+    <!-- Navigation principale améliorée -->
+    <section>
+        <h2>🚀 Actions rapides</h2>
         <div class="nav-grid">
-            <div class="nav-card primary" onclick="navigateTo('transactions')">
-                <div class="nav-icon">📝</div>
+            <a href="dashboard.html" class="nav-card primary hover-glow" data-animation="slideInUp">
+                <span class="nav-icon">📊</span>
+                <h3>Dashboard Intelligent</h3>
+                <p>Vue d'ensemble avec analyses prédictives et recommandations</p>
+                <div class="badge-modern success">Nouveau</div>
+            </a>
+            <a href="transactions.html" class="nav-card hover-glow" data-animation="slideInUp">
+                <span class="nav-icon">💳</span>
                 <h3>Transactions</h3>
-                <p>Ajouter et consulter vos revenus et dépenses</p>
-            </div>
-            <div class="nav-card primary" onclick="navigateTo('budgets')">
-                <div class="nav-icon">🎯</div>
-                <h3>Budgets & Analyses</h3>
-                <p>Gérer vos budgets et voir les statistiques</p>
-            </div>
-            <div class="nav-card" onclick="navigateTo('assistant')">
-                <div class="nav-icon">🤖</div>
-                <h3>Assistant IA</h3>
-                <p>Conseils personnalisés en français</p>
-            </div>
-            <div class="nav-card" onclick="navigateTo('goals')">
-                <div class="nav-icon">🏆</div>
+                <p>Gérez vos revenus et dépenses</p>
+            </a>
+            <a href="budgets.html" class="nav-card hover-glow" data-animation="slideInUp">
+                <span class="nav-icon">🎯</span>
+                <h3>Budgets</h3>
+                <p>Définissez et suivez vos budgets</p>
+            </a>
+            <a href="goals.html" class="nav-card hover-glow" data-animation="slideInUp">
+                <span class="nav-icon">🏆</span>
                 <h3>Objectifs</h3>
-                <p>Défis et objectifs d'épargne</p>
-            </div>
-            <div class="nav-card" onclick="navigateTo('data')">
-                <div class="nav-icon">💾</div>
-                <h3>Sauvegarde</h3>
-                <p>Exporter/Importer vos données</p>
-            </div>
-            <div class="nav-card" onclick="navigateTo('help')">
-                <div class="nav-icon">❓</div>
-                <h3>Aide</h3>
-                <p>Instructions et conseils d'utilisation</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Section des challenges -->
-    <section id="challenges-section">
-        <h2>🏆 Challenges du moment</h2>
-        <div id="challenges-container">
-            <!-- Les challenges seront affichés ici -->
+                <p>Atteignez vos objectifs financiers</p>
+            </a>
+            <a href="tips.html" class="nav-card hover-glow" data-animation="slideInUp">
+                <span class="nav-icon">💡</span>
+                <h3>Conseils</h3>
+                <p>Conseils pour optimiser votre budget</p>
+            </a>
         </div>
     </section>
 
     <script src="app.js"></script>
     <script>
-        // Variables globales pour les nouvelles fonctionnalités
-        let assistant;
-        let goalsManager;
-        let mobileMoney;
-        let educationManager;
-        let settingsManager;
-
-        // Enregistre le service worker pour assurer un fonctionnement hors ligne
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js')
-                .catch(function (error) {
-                    console.log('ServiceWorker registration failed:', error);
-                });
+        // Afficher le nom de l'utilisateur
+        function displayUserInfo() {
+            const userName = localStorage.getItem('user_name') || 'Utilisateur';
+            document.getElementById('display-name').textContent = userName;
         }
 
-        // Initialise toutes les fonctionnalités
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeFeatures();
-            updateDashboard();
+        // Gérer la déconnexion
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_email');
+            localStorage.removeItem('user_name');
+            window.location.href = 'login.html';
         });
 
-        // Initialise les nouvelles fonctionnalités
-        function initializeFeatures() {
-            assistant = new BudgetAssistant();
-            goalsManager = new GoalsManager();
-            mobileMoney = new MobileMoneyIntegration();
-            educationManager = new EducationManager();
-            settingsManager = new SettingsManager();
+        // Afficher les informations utilisateur au chargement
+        displayUserInfo();
 
-            // Met à jour les recommandations
-            updateRecommendations();
+        // Animations d'entrée
+        function animateOnScroll() {
+            const elements = document.querySelectorAll('[data-animation]');
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('animate');
+                }
+            });
         }
 
-        // Met à jour le tableau de bord
-        function updateDashboard() {
-            const transactions = loadTransactions();
-            updateQuickSummary(transactions);
-        }
-
-        // Met à jour les recommandations
-        function updateRecommendations() {
-            const transactions = loadTransactions();
-            const budgets = loadBudgets();
-            const recommendations = assistant.generateRecommendations(transactions, budgets);
-            
-            const container = document.getElementById('recommendations-container');
-            if (container) {
-                container.innerHTML = '';
-                recommendations.forEach(rec => {
-                    const card = document.createElement('div');
-                    card.className = `recommendation-card ${rec.type}`;
-                    card.innerHTML = `
-                        <h3>${rec.icon} ${rec.title}</h3>
-                        <p>${rec.message}</p>
-                    `;
-                    container.appendChild(card);
-                });
-            }
-        }
-
-        // Fonction de navigation
-        function navigateTo(section) {
-            const pages = {
-                'transactions': 'transactions.html',
-                'budgets': 'budgets.html',
-                'assistant': 'assistant.html',
-                'goals': 'goals.html',
-                'data': 'data.html',
-                'help': 'help.html',
-                'qr-generator': 'qr-generator.html'
-            };
-            
-            if (pages[section]) {
-                window.location.href = pages[section];
-            }
-        }
-
-        // Fonction utilitaire pour charger les transactions
-        function loadTransactions() {
-            try {
-                const data = JSON.parse(localStorage.getItem('transactions'));
-                return Array.isArray(data) ? data : [];
-            } catch (e) {
-                return [];
-            }
-        }
-
-        // Fonction utilitaire pour charger les budgets
-        function loadBudgets() {
-            try {
-                const data = JSON.parse(localStorage.getItem('budgets'));
-                return data && typeof data === 'object' ? data : {};
-            } catch (e) {
-                return {};
-            }
-        }
-
-        // Fonction utilitaire pour afficher les notifications
-        function showNotification(message, type = 'info') {
-            if (window.showNotification) {
-                window.showNotification(message, type);
-            } else {
-                console.log(`[${type.toUpperCase()}] ${message}`);
-            }
-        }
+        // Écouter le scroll pour les animations
+        window.addEventListener('scroll', animateOnScroll);
+        animateOnScroll(); // Exécuter une fois au chargement
     </script>
 </body>
 </html>

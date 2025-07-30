@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Couleurs du logo -->
+    <style>
+      .orange-bar { fill: #FF6B35; }
+      .green-stem { fill: #4CAF50; }
+      .orange-coin { fill: #FF6B35; }
+      .white-text { fill: white; }
+      .orange-text { fill: #FF6B35; font-family: Arial, sans-serif; font-weight: bold; }
+    </style>
+  </defs>
+  
+  <!-- Fond blanc -->
+  <rect width="512" height="512" fill="white"/>
+  
+  <!-- Élément graphique (centré) -->
+  <g transform="translate(100, 200)">
+    <!-- Barres orange (graphique de croissance) -->
+    <rect x="0" y="80" width="20" height="40" class="orange-bar" rx="4"/>
+    <rect x="30" y="65" width="20" height="55" class="orange-bar" rx="4"/>
+    <rect x="60" y="40" width="20" height="80" class="orange-bar" rx="4"/>
+    
+    <!-- Tige verte -->
+    <path d="M 80 40 Q 90 25 105 20 Q 120 15 135 20" stroke="#4CAF50" stroke-width="5" fill="none"/>
+    
+    <!-- Feuille verte -->
+    <ellipse cx="95" cy="30" rx="8" ry="4" class="green-stem" transform="rotate(-15 95 30)"/>
+    
+    <!-- Pièce orange avec dollar -->
+    <circle cx="135" cy="20" r="15" class="orange-coin"/>
+    <text x="135" y="28" text-anchor="middle" class="white-text" font-size="20" font-weight="bold">$</text>
+  </g>
+  
+  <!-- Texte "Mon Budget Malin" (en bas) -->
+  <g transform="translate(256, 350)">
+    <text x="0" y="0" class="orange-text" font-size="32" text-anchor="middle">Mon</text>
+    <text x="0" y="45" class="orange-text" font-size="32" text-anchor="middle">Budget</text>
+    <text x="0" y="90" class="orange-text" font-size="32" text-anchor="middle">Malin</text>
+  </g>
+</svg> 

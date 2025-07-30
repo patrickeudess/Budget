@@ -2,437 +2,394 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2196F3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Transactions">
     <title>Transactions - Mon Budget Malin</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="enhanced-styles.css">
+    <link rel="stylesheet" href="modern-components.css">
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <script src="plotly.js"></script>
 </head>
 <body>
-    <header>
-        <h1>📝 Transactions</h1>
-        <p>Gérez vos revenus et dépenses</p>
-    </header>
+    <!-- Vérification d'authentification -->
+    <script>
+        // Vérifier si l'utilisateur est connecté
+        function checkAuth() {
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+        }
+        
+        // Exécuter la vérification au chargement
+        checkAuth();
+    </script>
 
-    <nav class="breadcrumb">
-        <a href="index.html">🏠 Accueil</a> > Transactions
+    <!-- Barre de navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="icon-192.png" alt="Logo" class="nav-logo">
+                <span class="nav-title">💰 Mon Budget Malin</span>
+            </div>
+            <div class="nav-user">
+                <div id="connection-status" class="connection-status">
+                    <span class="status-indicator offline">🔴 Hors ligne</span>
+                </div>
+                <div id="user-info" class="user-info">
+                    <span id="user-name" class="user-name">👤 <span id="display-name">Utilisateur</span></span>
+                    <button id="logout-btn" class="logout-btn">🚪 Déconnexion</button>
+                </div>
+            </div>
+        </div>
     </nav>
 
-    <!-- Formulaire d'ajout de transaction -->
-    <section id="transaction-form">
+    <nav class="breadcrumb">
+        <a href="index.html">🏠 Accueil</a> > <span>Transactions</span>
+    </nav>
+
+    <!-- Résumé des transactions -->
+    <section>
+        <h2>📊 Résumé des transactions</h2>
+        <div class="summary-container">
+            <div class="summary-item">
+                <span class="summary-label">💰 Total Revenus :</span>
+                <span id="total-revenus" class="summary-value amount-positive">0 FCFA</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">💸 Total Dépenses :</span>
+                <span id="total-depenses" class="summary-value amount-negative">0 FCFA</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">💳 Solde :</span>
+                <span id="solde" class="summary-value">0 FCFA</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">📋 Nombre de transactions :</span>
+                <span id="transaction-count" class="summary-value">0</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Formulaire d'ajout de transaction amélioré -->
+    <section>
         <h2>➕ Nouvelle transaction</h2>
-        <form id="transactionForm">
+        <form id="transaction-form" class="enhanced-form">
             <div class="form-row">
                 <div class="form-group">
-                    <label for="transactionType">Type :</label>
-                    <select id="transactionType" required>
+                    <label for="date">📅 Date :</label>
+                    <input type="date" id="date" required>
+                    <div class="form-hint">Date de la transaction</div>
+                </div>
+                <div class="form-group">
+                    <label for="type">📊 Type :</label>
+                    <select id="type" required>
+                        <option value="">Sélectionnez le type</option>
                         <option value="revenu">💰 Revenu</option>
                         <option value="depense">💸 Dépense</option>
                     </select>
-                </div>
-                <div class="form-group">
-                    <label for="transactionCategory">Catégorie :</label>
-                    <select id="transactionCategory" required>
-                        <option value="">Sélectionnez une catégorie</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="transactionAmount">Montant (FCFA) :</label>
-                    <input type="number" id="transactionAmount" placeholder="0" required min="0" step="100">
+                    <div class="form-hint">Type de transaction</div>
                 </div>
             </div>
             
             <div class="form-row">
                 <div class="form-group">
-                    <label for="transactionDate">Date :</label>
-                    <input type="date" id="transactionDate" required>
+                    <label for="category">Catégorie :</label>
+                    <select id="category" required>
+                        <option value="">Sélectionnez une catégorie</option>
+                        <!-- Options pour revenus -->
+                        <option value="salaire" data-type="revenu">💰 Salaire</option>
+                        <option value="bonus" data-type="revenu">🎁 Bonus</option>
+                        <option value="freelance" data-type="revenu">💼 Freelance</option>
+                        <option value="investissement" data-type="revenu">📈 Investissement</option>
+                        <!-- Options pour dépenses -->
+                        <option value="nourriture" data-type="depense">🍽️ Nourriture</option>
+                        <option value="transport" data-type="depense">🚗 Transport</option>
+                        <option value="logement" data-type="depense">🏠 Logement</option>
+                        <option value="sante" data-type="depense">🏥 Santé</option>
+                        <option value="communication" data-type="depense">📱 Communication</option>
+                        <option value="loisirs" data-type="depense">🎮 Loisirs</option>
+                        <option value="vetements" data-type="depense">👕 Vêtements</option>
+                        <option value="education" data-type="depense">📚 Éducation</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label for="transactionPayment">Mode de paiement :</label>
-                    <select id="transactionPayment" required>
+                    <label for="amount">Montant (FCFA) :</label>
+                    <input type="number" id="amount" placeholder="0" required min="0" step="1000">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="payment-method">Mode de paiement :</label>
+                    <select id="payment-method" required>
+                        <option value="">Sélectionnez le mode</option>
+                        <option value="mobile-money">📱 Mobile Money</option>
                         <option value="especes">💵 Espèces</option>
                         <option value="carte">💳 Carte bancaire</option>
-                        <option value="mobile">📱 Mobile Money</option>
                         <option value="virement">🏦 Virement</option>
                     </select>
                 </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="transactionDescription">Description (optionnel) :</label>
-                <input type="text" id="transactionDescription" placeholder="Ex: Salaire janvier, Courses alimentaires...">
+                <div class="form-group">
+                    <label for="description">Description (optionnel) :</label>
+                    <input type="text" id="description" placeholder="Description de la transaction">
+                </div>
             </div>
             
             <div class="form-actions">
-                <button type="submit" class="btn-primary">💾 Enregistrer</button>
-                <button type="reset" class="btn-secondary">🔄 Réinitialiser</button>
+                <button type="submit" class="btn-primary">
+                    <span class="btn-icon">💾</span>
+                    Enregistrer
+                </button>
+                <button type="reset" class="btn-secondary">
+                    <span class="btn-icon">🔄</span>
+                    Réinitialiser
+                </button>
             </div>
         </form>
     </section>
 
-    <!-- Historique des transactions avec filtres -->
-    <section id="transaction-history">
+    <!-- Liste des transactions -->
+    <section>
         <h2>📋 Historique des transactions</h2>
+        <div class="transactions-controls">
+            <div class="filter-controls">
+                <select id="filter-type" class="filter-select">
+                    <option value="">Tous les types</option>
+                    <option value="revenu">💰 Revenus</option>
+                    <option value="depense">💸 Dépenses</option>
+                </select>
+                <select id="filter-category" class="filter-select">
+                    <option value="">Toutes les catégories</option>
+                </select>
+                <input type="month" id="filter-month" class="filter-date">
+            </div>
+            <div class="sort-controls">
+                <select id="sort-by" class="sort-select">
+                    <option value="date">📅 Par date</option>
+                    <option value="amount">💰 Par montant</option>
+                    <option value="category">📂 Par catégorie</option>
+                </select>
+            </div>
+        </div>
         
-        <!-- Filtres -->
-        <div class="filters-container">
-            <div class="filter-group">
-                <label for="filterType">Type :</label>
-                <select id="filterType">
-                    <option value="">Tous</option>
-                    <option value="revenu">Revenus</option>
-                    <option value="depense">Dépenses</option>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label for="filterCategory">Catégorie :</label>
-                <select id="filterCategory">
-                    <option value="">Toutes</option>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label for="filterMonth">Mois :</label>
-                <select id="filterMonth">
-                    <option value="">Tous les mois</option>
-                </select>
-            </div>
-            
-            <div class="filter-actions">
-                <button onclick="clearFilters()" class="btn-secondary">🔄 Réinitialiser</button>
-                <button onclick="exportTransactions()" class="btn-primary">📤 Exporter</button>
-            </div>
-        </div>
-
-        <!-- Résumé des filtres -->
-        <div class="history-summary">
-            <div class="summary-stat">
-                <span class="stat-label">Total revenus :</span>
-                <span id="filtered-revenus" class="stat-value positive">0 FCFA</span>
-            </div>
-            <div class="summary-stat">
-                <span class="stat-label">Total dépenses :</span>
-                <span id="filtered-depenses" class="stat-value negative">0 FCFA</span>
-            </div>
-            <div class="summary-stat">
-                <span class="stat-label">Solde :</span>
-                <span id="filtered-solde" class="stat-value">0 FCFA</span>
-            </div>
-            <div class="summary-stat">
-                <span class="stat-label">Transactions :</span>
-                <span id="filtered-count" class="stat-value">0</span>
-            </div>
-        </div>
-
-        <!-- Tableau des transactions -->
-        <div class="table-container">
-            <table id="transactionsTable">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>Catégorie</th>
-                        <th>Montant</th>
-                        <th>Paiement</th>
-                        <th>Description</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="transactionsTableBody">
-                    <!-- Les transactions seront affichées ici -->
-                </tbody>
-            </table>
+        <div id="transactions-list" class="transactions-list">
+            <!-- Les transactions seront affichées ici -->
         </div>
     </section>
 
-    <div class="page-actions">
-        <button onclick="window.location.href='index.html'" class="btn-secondary">🏠 Accueil</button>
-        <button onclick="window.location.href='budgets.html'" class="btn-primary">📊 Budgets & Analyses</button>
-    </div>
-
     <script src="app.js"></script>
     <script>
-        // Catégories par type de transaction
-        const categories = {
-            revenu: [
-                { value: 'salaire', label: '💰 Salaire' },
-                { value: 'bonus', label: '🎁 Bonus' },
-                { value: 'freelance', label: '💼 Freelance' },
-                { value: 'investissement', label: '📈 Investissement' },
-                { value: 'autre_revenu', label: '💵 Autre revenu' }
-            ],
-            depense: [
-                { value: 'nourriture', label: '🍽️ Nourriture' },
-                { value: 'transport', label: '🚗 Transport' },
-                { value: 'logement', label: '🏠 Logement' },
-                { value: 'sante', label: '🏥 Santé' },
-                { value: 'communication', label: '📱 Communication' },
-                { value: 'loisirs', label: '🎮 Loisirs' },
-                { value: 'vetements', label: '👕 Vêtements' },
-                { value: 'education', label: '📚 Éducation' },
-                { value: 'autre_depense', label: '💸 Autre dépense' }
-            ]
-        };
+        // Afficher le nom de l'utilisateur
+        function displayUserInfo() {
+            const userName = localStorage.getItem('user_name') || 'Utilisateur';
+            document.getElementById('display-name').textContent = userName;
+        }
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeTransactionPage();
+        // Gérer la déconnexion
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_email');
+            localStorage.removeItem('user_name');
+            window.location.href = 'login.html';
         });
 
-        function initializeTransactionPage() {
-            // Définir la date par défaut
-            document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
-            
-            // Initialiser les catégories
-            updateCategories();
-            
-            // Événements
-            document.getElementById('transactionType').addEventListener('change', updateCategories);
-            document.getElementById('transactionForm').addEventListener('submit', handleTransactionSubmit);
-            
-            // Initialiser les filtres
-            initializeFilters();
-            
-            // Charger et afficher les transactions
-            loadAndDisplayTransactions();
-        }
+        // Afficher les informations utilisateur au chargement
+        displayUserInfo();
 
-        function updateCategories() {
-            const type = document.getElementById('transactionType').value;
-            const categorySelect = document.getElementById('transactionCategory');
-            const filterCategorySelect = document.getElementById('filterCategory');
-            
-            // Vider les options
-            categorySelect.innerHTML = '<option value="">Sélectionnez une catégorie</option>';
-            filterCategorySelect.innerHTML = '<option value="">Toutes</option>';
-            
-            if (type && categories[type]) {
-                categories[type].forEach(cat => {
-                    // Ajouter à la sélection de transaction
-                    const option = document.createElement('option');
-                    option.value = cat.value;
-                    option.textContent = cat.label;
-                    categorySelect.appendChild(option);
-                    
-                    // Ajouter aux filtres
-                    const filterOption = document.createElement('option');
-                    filterOption.value = cat.value;
-                    filterOption.textContent = cat.label;
-                    filterCategorySelect.appendChild(filterOption);
-                });
-            }
-        }
-
-        function handleTransactionSubmit(e) {
-            e.preventDefault();
-            
-            const transaction = {
-                id: Date.now(),
-                type: document.getElementById('transactionType').value,
-                category: document.getElementById('transactionCategory').value,
-                amount: parseFloat(document.getElementById('transactionAmount').value),
-                date: document.getElementById('transactionDate').value,
-                paymentMethod: document.getElementById('transactionPayment').value,
-                description: document.getElementById('transactionDescription').value || '',
-                timestamp: new Date().toISOString()
-            };
-            
-            // Sauvegarder la transaction
-            saveTransaction(transaction);
-            
-            // Réinitialiser le formulaire
-            document.getElementById('transactionForm').reset();
-            document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
-            
-            // Recharger l'affichage
-            loadAndDisplayTransactions();
-            
-            // Notification
-            showNotification('Transaction enregistrée avec succès !', 'success');
-        }
-
-        function saveTransaction(transaction) {
-            const transactions = loadTransactions();
-            transactions.push(transaction);
-            localStorage.setItem('transactions', JSON.stringify(transactions));
-        }
-
+        // Charger et afficher les transactions
         function loadTransactions() {
-            try {
-                const data = JSON.parse(localStorage.getItem('transactions'));
-                return Array.isArray(data) ? data : [];
-            } catch (e) {
-                return [];
-            }
+            const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+            displayTransactions(transactions);
+            updateSummary(transactions);
         }
 
-        function loadAndDisplayTransactions() {
-            const transactions = loadTransactions();
-            const filteredTransactions = filterTransactions(transactions);
-            displayTransactions(filteredTransactions);
-            updateFilteredSummary(filteredTransactions);
-        }
-
-        function filterTransactions(transactions) {
-            const typeFilter = document.getElementById('filterType').value;
-            const categoryFilter = document.getElementById('filterCategory').value;
-            const monthFilter = document.getElementById('filterMonth').value;
-            
-            return transactions.filter(transaction => {
-                const typeMatch = !typeFilter || transaction.type === typeFilter;
-                const categoryMatch = !categoryFilter || transaction.category === categoryFilter;
-                const monthMatch = !monthFilter || transaction.date.startsWith(monthFilter);
-                
-                return typeMatch && categoryMatch && monthMatch;
-            });
-        }
-
+        // Afficher les transactions
         function displayTransactions(transactions) {
-            const tbody = document.getElementById('transactionsTableBody');
-            tbody.innerHTML = '';
-            
+            const container = document.getElementById('transactions-list');
+            container.innerHTML = '';
+
             if (transactions.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="empty-message">
-                            Aucune transaction trouvée
-                        </td>
-                    </tr>
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <h3>Aucune transaction</h3>
+                        <p>Commencez par ajouter votre première transaction</p>
+                    </div>
                 `;
                 return;
             }
-            
-            // Trier par date (plus récent en premier)
-            transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            transactions.forEach(transaction => {
-                const row = document.createElement('tr');
-                row.className = transaction.type === 'revenu' ? 'revenu-row' : 'depense-row';
+
+            // Grouper par date
+            const groupedTransactions = groupTransactionsByDate(transactions);
+
+            Object.keys(groupedTransactions).forEach(date => {
+                const dayTransactions = groupedTransactions[date];
+                const daySection = document.createElement('div');
+                daySection.className = 'transaction-day';
                 
-                const amountClass = transaction.type === 'revenu' ? 'positive' : 'negative';
-                const amountSign = transaction.type === 'revenu' ? '+' : '-';
-                
-                row.innerHTML = `
-                    <td>${formatDate(transaction.date)}</td>
-                    <td>
-                        <span class="transaction-type ${transaction.type}">
-                            ${transaction.type === 'revenu' ? '💰' : '💸'} ${transaction.type}
-                        </span>
-                    </td>
-                    <td>${getCategoryLabel(transaction.category)}</td>
-                    <td class="${amountClass}">${amountSign}${transaction.amount.toLocaleString()} FCFA</td>
-                    <td>${getPaymentMethodLabel(transaction.paymentMethod)}</td>
-                    <td>${transaction.description || '-'}</td>
-                    <td>
-                        <button onclick="deleteTransaction(${transaction.id})" class="btn-delete" title="Supprimer">
-                            🗑️
-                        </button>
-                    </td>
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'day-header';
+                dayHeader.innerHTML = `
+                    <h3>${formatDate(date)}</h3>
+                    <span class="day-total">${calculateDayTotal(dayTransactions)} FCFA</span>
                 `;
-                
-                tbody.appendChild(row);
+                daySection.appendChild(dayHeader);
+
+                dayTransactions.forEach(transaction => {
+                    const transactionElement = createTransactionElement(transaction);
+                    daySection.appendChild(transactionElement);
+                });
+
+                container.appendChild(daySection);
             });
         }
 
-        function updateFilteredSummary(transactions) {
-            const revenus = transactions.filter(t => t.type === 'revenu').reduce((sum, t) => sum + t.amount, 0);
-            const depenses = transactions.filter(t => t.type === 'depense').reduce((sum, t) => sum + t.amount, 0);
-            const solde = revenus - depenses;
+        // Créer un élément de transaction
+        function createTransactionElement(transaction) {
+            const element = document.createElement('div');
+            element.className = `transaction-item ${transaction.type}`;
             
-            document.getElementById('filtered-revenus').textContent = `${revenus.toLocaleString()} FCFA`;
-            document.getElementById('filtered-depenses').textContent = `${depenses.toLocaleString()} FCFA`;
-            document.getElementById('filtered-solde').textContent = `${solde.toLocaleString()} FCFA`;
-            document.getElementById('filtered-count').textContent = transactions.length;
+            const icon = transaction.type === 'revenu' ? '💰' : '💸';
+            const amountClass = transaction.type === 'revenu' ? 'amount-positive' : 'amount-negative';
             
-            // Couleurs du solde
-            const soldeElement = document.getElementById('filtered-solde');
-            soldeElement.className = 'stat-value ' + (solde >= 0 ? 'positive' : 'negative');
-        }
-
-        function initializeFilters() {
-            // Initialiser les mois disponibles
-            const transactions = loadTransactions();
-            const months = [...new Set(transactions.map(t => t.date.substring(0, 7)))].sort().reverse();
+            element.innerHTML = `
+                <div class="transaction-icon">${icon}</div>
+                <div class="transaction-details">
+                    <div class="transaction-category">${getCategoryIcon(transaction.category)} ${transaction.category}</div>
+                    <div class="transaction-description">${transaction.description || 'Aucune description'}</div>
+                    <div class="transaction-meta">
+                        <span class="transaction-date">${formatDate(transaction.date)}</span>
+                        <span class="transaction-payment">${getPaymentIcon(transaction.paymentMethod)} ${transaction.paymentMethod}</span>
+                    </div>
+                </div>
+                <div class="transaction-amount ${amountClass}">
+                    ${transaction.type === 'revenu' ? '+' : '-'}${formatAmount(transaction.amount)} FCFA
+                </div>
+                <div class="transaction-actions">
+                    <button class="btn-edit" onclick="editTransaction('${transaction.id}')">✏️</button>
+                    <button class="btn-delete" onclick="deleteTransaction('${transaction.id}')">🗑️</button>
+                </div>
+            `;
             
-            const monthSelect = document.getElementById('filterMonth');
-            months.forEach(month => {
-                const option = document.createElement('option');
-                option.value = month;
-                option.textContent = formatMonth(month);
-                monthSelect.appendChild(option);
-            });
-            
-            // Événements des filtres
-            document.getElementById('filterType').addEventListener('change', loadAndDisplayTransactions);
-            document.getElementById('filterCategory').addEventListener('change', loadAndDisplayTransactions);
-            document.getElementById('filterMonth').addEventListener('change', loadAndDisplayTransactions);
-        }
-
-        function clearFilters() {
-            document.getElementById('filterType').value = '';
-            document.getElementById('filterCategory').value = '';
-            document.getElementById('filterMonth').value = '';
-            loadAndDisplayTransactions();
-        }
-
-        function deleteTransaction(id) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer cette transaction ?')) {
-                const transactions = loadTransactions();
-                const filtered = transactions.filter(t => t.id !== id);
-                localStorage.setItem('transactions', JSON.stringify(filtered));
-                loadAndDisplayTransactions();
-                showNotification('Transaction supprimée', 'success');
-            }
-        }
-
-        function exportTransactions() {
-            const transactions = loadTransactions();
-            const dataStr = JSON.stringify(transactions, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `transactions_${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            
-            showNotification('Transactions exportées !', 'success');
+            return element;
         }
 
         // Fonctions utilitaires
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('fr-FR');
+        function groupTransactionsByDate(transactions) {
+            return transactions.reduce((groups, transaction) => {
+                const date = transaction.date;
+                if (!groups[date]) {
+                    groups[date] = [];
+                }
+                groups[date].push(transaction);
+                return groups;
+            }, {});
         }
 
-        function formatMonth(monthStr) {
-            const [year, month] = monthStr.split('-');
-            const date = new Date(year, month - 1);
-            return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' });
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
         }
 
-        function getCategoryLabel(category) {
-            const allCategories = [...categories.revenu, ...categories.depense];
-            const found = allCategories.find(cat => cat.value === category);
-            return found ? found.label : category;
+        function formatAmount(amount) {
+            return new Intl.NumberFormat('fr-FR').format(amount);
         }
 
-        function getPaymentMethodLabel(method) {
-            const labels = {
-                'especes': '💵 Espèces',
-                'carte': '💳 Carte',
-                'mobile': '📱 Mobile',
-                'virement': '🏦 Virement'
+        function calculateDayTotal(transactions) {
+            const total = transactions.reduce((sum, transaction) => {
+                return transaction.type === 'revenu' ? sum + transaction.amount : sum - transaction.amount;
+            }, 0);
+            return formatAmount(Math.abs(total));
+        }
+
+        function getCategoryIcon(category) {
+            const icons = {
+                'salaire': '💰',
+                'bonus': '🎁',
+                'freelance': '💼',
+                'investissement': '📈',
+                'nourriture': '🍽️',
+                'transport': '🚗',
+                'logement': '🏠',
+                'sante': '🏥',
+                'communication': '📱',
+                'loisirs': '🎮',
+                'vetements': '👕',
+                'education': '📚'
             };
-            return labels[method] || method;
+            return icons[category] || '📦';
         }
 
-        function showNotification(message, type = 'info') {
-            if (window.showNotification) {
-                window.showNotification(message, type);
-            } else {
-                console.log(`[${type.toUpperCase()}] ${message}`);
-            }
+        function getPaymentIcon(paymentMethod) {
+            const icons = {
+                'mobile-money': '📱',
+                'especes': '💵',
+                'carte': '💳',
+                'virement': '🏦'
+            };
+            return icons[paymentMethod] || '💳';
         }
+
+        function updateSummary(transactions) {
+            const totalRevenus = transactions
+                .filter(t => t.type === 'revenu')
+                .reduce((sum, t) => sum + t.amount, 0);
+            
+            const totalDepenses = transactions
+                .filter(t => t.type === 'depense')
+                .reduce((sum, t) => sum + t.amount, 0);
+            
+            const solde = totalRevenus - totalDepenses;
+
+            document.getElementById('total-revenus').textContent = formatAmount(totalRevenus) + ' FCFA';
+            document.getElementById('total-depenses').textContent = formatAmount(totalDepenses) + ' FCFA';
+            document.getElementById('solde').textContent = formatAmount(Math.abs(solde)) + ' FCFA';
+            document.getElementById('transaction-count').textContent = transactions.length;
+        }
+
+        // Gérer le formulaire
+        document.getElementById('transaction-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const transaction = {
+                id: Date.now().toString(),
+                date: formData.get('date'),
+                type: formData.get('type'),
+                category: formData.get('category'),
+                amount: parseFloat(formData.get('amount')),
+                paymentMethod: formData.get('payment-method'),
+                description: formData.get('description'),
+                createdAt: new Date().toISOString()
+            };
+
+            // Sauvegarder la transaction
+            const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+            transactions.push(transaction);
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+
+            // Recharger l'affichage
+            loadTransactions();
+
+            // Réinitialiser le formulaire
+            e.target.reset();
+        });
+
+        // Charger les transactions au démarrage
+        loadTransactions();
     </script>
 </body>
 </html> 

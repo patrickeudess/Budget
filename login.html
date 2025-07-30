@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Mon Budget Malin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="enhanced-styles.css">
+    <link rel="stylesheet" href="modern-components.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .auth-container {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 3rem;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-lg);
+        }
+
+        h1 {
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: var(--gray-color);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid #e1e5e9;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            background: var(--white);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 152, 121, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-modern {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-modern.primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: var(--white);
+        }
+
+        .btn-modern.primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-modern.secondary {
+            background: var(--light-color);
+            color: var(--dark-color);
+            border: 2px solid #e1e5e9;
+        }
+
+        .btn-modern.secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .toggle-form {
+            margin-top: 2rem;
+            color: var(--gray-color);
+            font-size: 0.875rem;
+        }
+
+        .toggle-form a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .toggle-form a:hover {
+            color: var(--primary-dark);
+        }
+
+        .error-message,
+        .success-message {
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            display: none;
+            font-weight: 500;
+        }
+
+        .error-message {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+
+        .success-message {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 0.75rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            body {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="logo">💰</div>
+        <h1>Mon Budget Malin</h1>
+        <p class="subtitle">Gérez votre budget intelligemment</p>
+
+        <!-- Messages d'erreur/succès -->
+        <div id="error-message" class="error-message"></div>
+        <div id="success-message" class="success-message"></div>
+
+        <!-- Formulaire de connexion -->
+        <form id="login-form">
+            <div class="form-group">
+                <label for="login-email">📧 Email</label>
+                <input type="email" id="login-email" required placeholder="votre@email.com">
+            </div>
+            <div class="form-group">
+                <label for="login-password">🔒 Mot de passe</label>
+                <input type="password" id="login-password" required placeholder="Votre mot de passe">
+            </div>
+            <button type="submit" class="btn-modern primary">
+                <span>🔐</span>
+                Se connecter
+            </button>
+            <div class="loading" id="login-loading">
+                <div class="spinner"></div>
+                <p>Connexion en cours...</p>
+            </div>
+        </form>
+
+        <!-- Formulaire d'inscription -->
+        <form id="register-form" style="display: none;">
+            <div class="form-group">
+                <label for="register-name">👤 Nom complet</label>
+                <input type="text" id="register-name" required placeholder="Votre nom complet">
+            </div>
+            <div class="form-group">
+                <label for="register-email">📧 Email</label>
+                <input type="email" id="register-email" required placeholder="votre@email.com">
+            </div>
+            <div class="form-group">
+                <label for="register-password">🔒 Mot de passe</label>
+                <input type="password" id="register-password" required placeholder="Minimum 6 caractères">
+            </div>
+            <div class="form-group">
+                <label for="register-confirm-password">🔐 Confirmer le mot de passe</label>
+                <input type="password" id="register-confirm-password" required placeholder="Confirmez votre mot de passe">
+            </div>
+            <button type="submit" class="btn-modern primary">
+                <span>✅</span>
+                Créer un compte
+            </button>
+            <div class="loading" id="register-loading">
+                <div class="spinner"></div>
+                <p>Création du compte...</p>
+            </div>
+        </form>
+
+        <!-- Boutons de basculement -->
+        <div class="toggle-form">
+            <span id="login-toggle">
+                Pas encore de compte ? 
+                <a href="#" onclick="toggleForm('register')">Créer un compte</a>
+            </span>
+            <span id="register-toggle" style="display: none;">
+                Déjà un compte ? 
+                <a href="#" onclick="toggleForm('login')">Se connecter</a>
+            </span>
+        </div>
+    </div>
+
+    <script>
+        // Vérifier si l'utilisateur est déjà connecté
+        function checkAuth() {
+            const token = localStorage.getItem('auth_token');
+            if (token) {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Basculer entre les formulaires
+        function toggleForm(type) {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const loginToggle = document.getElementById('login-toggle');
+            const registerToggle = document.getElementById('register-toggle');
+
+            if (type === 'register') {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                loginToggle.style.display = 'none';
+                registerToggle.style.display = 'block';
+            } else {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                loginToggle.style.display = 'block';
+                registerToggle.style.display = 'none';
+            }
+
+            // Effacer les messages
+            hideMessages();
+        }
+
+        // Afficher les messages
+        function showMessage(message, type) {
+            const errorDiv = document.getElementById('error-message');
+            const successDiv = document.getElementById('success-message');
+
+            if (type === 'error') {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                successDiv.style.display = 'none';
+            } else {
+                successDiv.textContent = message;
+                successDiv.style.display = 'block';
+                errorDiv.style.display = 'none';
+            }
+        }
+
+        // Masquer les messages
+        function hideMessages() {
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+        }
+
+        // Gérer la connexion
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const loading = document.getElementById('login-loading');
+
+            loading.style.display = 'block';
+            hideMessages();
+
+            try {
+                // Simulation d'une API de connexion
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Pour la démo, on accepte n'importe quel email/mot de passe
+                if (email && password) {
+                    localStorage.setItem('auth_token', 'demo_token');
+                    localStorage.setItem('user_email', email);
+                    localStorage.setItem('user_name', email.split('@')[0]);
+                    
+                    showMessage('Connexion réussie !', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    showMessage('Email et mot de passe requis', 'error');
+                }
+            } catch (error) {
+                showMessage('Erreur de connexion', 'error');
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+
+        // Gérer l'inscription
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            const loading = document.getElementById('register-loading');
+
+            loading.style.display = 'block';
+            hideMessages();
+
+            try {
+                // Validation
+                if (password !== confirmPassword) {
+                    showMessage('Les mots de passe ne correspondent pas', 'error');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    showMessage('Le mot de passe doit contenir au moins 6 caractères', 'error');
+                    return;
+                }
+
+                // Simulation d'une API d'inscription
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                localStorage.setItem('auth_token', 'demo_token');
+                localStorage.setItem('user_email', email);
+                localStorage.setItem('user_name', name);
+                
+                showMessage('Compte créé avec succès !', 'success');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            } catch (error) {
+                showMessage('Erreur lors de la création du compte', 'error');
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+
+        // Vérifier l'authentification au chargement
+        checkAuth();
+    </script>
+</body>
+</html> 

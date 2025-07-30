@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Générateur d'icônes</title>
+</head>
+<body>
+    <h1>Générateur d'icônes Mon Budget Malin</h1>
+    
+    <canvas id="canvas192" width="192" height="192"></canvas>
+    <canvas id="canvas512" width="512" height="512"></canvas>
+    
+    <script>
+        function createIcon(canvasId, size) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            // Fond blanc
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, size, size);
+            
+            const scale = size / 512;
+            const centerX = size / 2;
+            const centerY = size / 2;
+            
+            // Couleurs
+            const orange = '#FF6B35';
+            const green = '#4CAF50';
+            
+            // Barres orange (graphique de croissance)
+            const barWidth = 20 * scale;
+            const barHeight1 = 40 * scale;
+            const barHeight2 = 55 * scale;
+            const barHeight3 = 80 * scale;
+            
+            ctx.fillStyle = orange;
+            ctx.fillRect(centerX - 60 * scale, centerY + 20 * scale, barWidth, barHeight1);
+            ctx.fillRect(centerX - 30 * scale, centerY + 5 * scale, barWidth, barHeight2);
+            ctx.fillRect(centerX, centerY - 20 * scale, barWidth, barHeight3);
+            
+            // Tige verte
+            ctx.strokeStyle = green;
+            ctx.lineWidth = 5 * scale;
+            ctx.beginPath();
+            ctx.moveTo(centerX + 20 * scale, centerY - 20 * scale);
+            ctx.quadraticCurveTo(centerX + 30 * scale, centerY - 35 * scale, centerX + 45 * scale, centerY - 40 * scale);
+            ctx.quadraticCurveTo(centerX + 60 * scale, centerY - 45 * scale, centerX + 75 * scale, centerY - 40 * scale);
+            ctx.stroke();
+            
+            // Feuille verte
+            ctx.fillStyle = green;
+            ctx.save();
+            ctx.translate(centerX + 35 * scale, centerY - 30 * scale);
+            ctx.rotate(-15 * Math.PI / 180);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 8 * scale, 4 * scale, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.restore();
+            
+            // Pièce orange avec dollar
+            ctx.fillStyle = orange;
+            ctx.beginPath();
+            ctx.arc(centerX + 75 * scale, centerY - 40 * scale, 15 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = 'white';
+            ctx.font = `${20 * scale}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.fillText('$', centerX + 75 * scale, centerY - 40 * scale + 8 * scale);
+            
+            // Texte "Mon Budget Malin"
+            ctx.fillStyle = orange;
+            ctx.font = `${16 * scale}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.fillText('Mon', centerX, centerY + 50 * scale);
+            ctx.fillText('Budget', centerX, centerY + 70 * scale);
+            ctx.fillText('Malin', centerX, centerY + 90 * scale);
+            
+            // Convertir en base64
+            return canvas.toDataURL('image/png');
+        }
+        
+        // Générer les icônes
+        const icon192 = createIcon('canvas192', 192);
+        const icon512 = createIcon('canvas512', 512);
+        
+        // Créer les liens de téléchargement
+        const link192 = document.createElement('a');
+        link192.href = icon192;
+        link192.download = 'icon-192.png';
+        link192.textContent = 'Télécharger icon-192.png';
+        document.body.appendChild(link192);
+        document.body.appendChild(document.createElement('br'));
+        
+        const link512 = document.createElement('a');
+        link512.href = icon512;
+        link512.download = 'icon-512.png';
+        link512.textContent = 'Télécharger icon-512.png';
+        document.body.appendChild(link512);
+        
+        console.log('Icônes générées avec succès !');
+    </script>
+</body>
+</html> 
